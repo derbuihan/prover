@@ -18,7 +18,7 @@ tokenize ('<' : '-' : '>' : xs) = TIff : tokenize xs
 tokenize (x : xs)
   | isAlpha x =
       let (keyword, rest) = span isAlphaNum (x : xs)
-       in (convertKeywords keyword) : tokenize rest
+       in convertKeywords keyword : tokenize rest
   | otherwise = error $ "Unknown character: " ++ [x]
 
 convertKeywords :: String -> Token
