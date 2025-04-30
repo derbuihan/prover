@@ -97,6 +97,18 @@ parseVar (TLParen : tokens) =
         _ -> error "Expected closing parenthesis"
 parseVar _ = error "Expected variable"
 
+-- Parser for Assumptions
+parseAssumptions :: String -> [Prop]
+parseAssumptions s = map parseProp ( splitOn ',' s)
+
+splitOn :: Char -> String -> [String]
+splitOn _ [] = []
+splitOn delim str =
+  let (first, remainder) = break (== delim) str
+   in first : case remainder of
+        [] -> []
+        (_ : rest) -> splitOn delim rest
+
 -- Parser for Tactic
 parseTactic :: String -> Tactic
 parseTactic s =

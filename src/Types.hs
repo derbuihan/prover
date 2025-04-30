@@ -54,7 +54,7 @@ instance Show Tactic where
   show (Assum p) = "assum " ++ show p
   show (ModusPonens p q) = "mpp " ++ show p ++ " " ++ show q
   show (DoubleNegationElim p) = "dn " ++ show p
-  show (Done) = "done"
+  show Done = "done"
   show _ = "other tactic"
 
 data ProofState = ProofState

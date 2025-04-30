@@ -8,6 +8,7 @@ spec :: Spec
 spec = do
   describe "Tokenizer" specTokenize
   describe "Parser for Prop" specParseProp
+  describe "Parser for Assumptions" specParseAssumptions
   describe "Parser for Tactic" specParseTactic
 
 specTokenize :: Spec
@@ -78,6 +79,26 @@ specParseProp = do
     let input = "!(x & y) <-> !x | !y"
         actual = parseProp input
         expected = Iff (Not (And (Var "x") (Var "y"))) (Or (Not (Var "x")) (Not (Var "y")))
+    actual `shouldBe` expected
+
+specParseAssumptions :: Spec
+specParseAssumptions = do
+  it "single assumption" $ do
+    let input = "x1"
+        actual = parseAssumptions input
+        expected = [Var "x1"]
+    actual `shouldBe` expected
+
+  it "multiple assumptions" $ do
+    let input = "x1, y11, !z123"
+        actual = parseAssumptions input
+        expected = [Var "x1", Var "y11", Not (Var "z123")]
+    actual `shouldBe` expected
+
+  it "empty assumptions" $ do
+    let input = ""
+        actual = parseAssumptions input
+        expected = []
     actual `shouldBe` expected
 
 specParseTactic :: Spec

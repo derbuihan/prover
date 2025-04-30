@@ -9,14 +9,17 @@ main = do
   putStrLn "Welcome to the Prover!"
   putStrLn "Enter a goal: "
   goalInput <- getLine
+  putStrLn "Enter assumptions (separated by commas): "
+  assumptionsInput <- getLine
   let parsedGoal = parseProp goalInput
-  loop $ initState parsedGoal
+      parsedAssum = parseAssumptions assumptionsInput
+  loop $ initState parsedGoal parsedAssum
 
-initState :: Prop -> ProofState
-initState parsedGoal =
+initState :: Prop -> [Prop] -> ProofState
+initState parsedGoal parsedAssum =
   ProofState
     { goal = parsedGoal,
-      assumptions = [],
+      assumptions = parsedAssum,
       tactics = []
     }
 
