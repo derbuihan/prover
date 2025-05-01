@@ -24,17 +24,17 @@ tokenize (x : xs)
 convertKeywords :: String -> Token
 convertKeywords keyword =
   case keyword of
-    "assume" -> TAssum
+    "assume" -> TAssume
     "andI" -> TAndIntro
     "andEL" -> TAndElimLeft
     "andER" -> TAndElimRight
-    "orIL" -> TOrIntroLeft
-    "orIR" -> TOrIntroRight
+    "orI" -> TOrIntro
     "orE" -> TOrElim
     "impI" -> TImpIntro
+    "cp" -> TImpIntro
     "impE" -> TImpElim
-    "dnI" -> TDnIntro
-    "dnE" -> TDnElim
+    "mpp" -> TImpElim
+    "dn" -> TDn
     "contra" -> TContra
     "done" -> TDone
     _ -> TAtom keyword
@@ -129,25 +129,21 @@ parseTactic s =
         _ -> error "Parsing failed, unexpected tokens remaining"
 
 parseTactic_ :: Parser Tactic
-parseTactic_ (TAssum : tokens) =
+parseTactic_ (TAssume : tokens) =
   let (prop, rest) = parseProp_ tokens
    in (Assume prop, rest)
 parseTactic_ (TAndIntro : tokens) =
   let (p, rest) = parseProp_ tokens
-      (q, rest_) = parseProp_ rest
-   in (AndIntro p q, rest_)
+   in (AndIntro p, rest)
 parseTactic_ (TAndElimLeft : tokens) =
   let (p, rest) = parseProp_ tokens
    in (AndElimLeft p, rest)
 parseTactic_ (TAndElimRight : tokens) =
   let (p, rest) = parseProp_ tokens
    in (AndElimRight p, rest)
-parseTactic_ (TOrIntroLeft : tokens) =
+parseTactic_ (TOrIntro : tokens) =
   let (p, rest) = parseProp_ tokens
-   in (OrIntroLeft p, rest)
-parseTactic_ (TOrIntroRight : tokens) =
-  let (p, rest) = parseProp_ tokens
-   in (OrIntroRight p, rest)
+   in (OrIntro p, rest)
 parseTactic_ (TOrElim : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest
@@ -155,18 +151,14 @@ parseTactic_ (TOrElim : tokens) =
    in (OrElim p q r, rest__)
 parseTactic_ (TImpIntro : tokens) =
   let (p, rest) = parseProp_ tokens
-      (q, rest_) = parseProp_ rest
-   in (ImpIntro p q, rest_)
+   in (ImpIntro p, rest)
 parseTactic_ (TImpElim : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest
    in (ImpElim p q, rest_)
-parseTactic_ (TDnIntro : tokens) =
-  let (prop, rest) = parseProp_ tokens
-   in (DnIntro prop, rest)
-parseTactic_ (TDnElim : tokens) =
-  let (prop, rest) = parseProp_ tokens
-   in (DnElim prop, rest)
+parseTactic_ (TDn : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (Dn p, rest)
 parseTactic_ (TContra : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest

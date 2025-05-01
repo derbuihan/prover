@@ -10,17 +10,15 @@ data Token
   | TLParen -- (
   | TRParen -- )
   | TEOF -- end of file
-  | TAssum -- assumption
+  | TAssume -- assumption
   | TAndIntro -- and introduction
   | TAndElimLeft -- and elimination left
   | TAndElimRight -- and elimination right
-  | TOrIntroLeft -- or introduction left
-  | TOrIntroRight -- or introduction right
+  | TOrIntro -- or introduction
   | TOrElim -- or elimination
   | TImpIntro -- implication introduction
   | TImpElim -- implication elimination
-  | TDnIntro -- double negation introduction
-  | TDnElim -- double negation elimination
+  | TDn -- double negation
   | TContra -- contradiction
   | TDone -- done
   deriving (Eq, Show)
@@ -44,32 +42,28 @@ instance Show Prop where
 
 data Tactic
   = Assume Prop -- Assumption
-  | AndIntro Prop Prop -- And Introduction
+  | AndIntro Prop -- And Introduction
   | AndElimLeft Prop -- And Elimination Left
   | AndElimRight Prop -- And Elimination Right
-  | OrIntroLeft Prop -- Or Introduction Left
-  | OrIntroRight Prop -- Or Introduction Right
+  | OrIntro Prop -- Or Introduction
   | OrElim Prop Prop Prop -- Or Elimination
-  | ImpIntro Prop Prop -- Implication Introduction
+  | ImpIntro Prop -- Implication Introduction
   | ImpElim Prop Prop -- Implication Elimination
-  | DnIntro Prop -- Double Negation Introduction
-  | DnElim Prop -- Double Negation Elimination
+  | Dn Prop -- Double Negation
   | Contra Prop Prop -- Contradiction
   | Done -- Done
   deriving (Eq)
 
 instance Show Tactic where
   show (Assume p) = "assume " ++ show p
-  show (AndIntro p1 p2) = "andI " ++ show p1 ++ " " ++ show p2
+  show (AndIntro p1) = "andI " ++ show p1
   show (AndElimLeft p) = "andEL " ++ show p
   show (AndElimRight p) = "andER " ++ show p
-  show (OrIntroLeft p) = "orIL " ++ show p
-  show (OrIntroRight p) = "orIR " ++ show p
+  show (OrIntro p) = "orI " ++ show p
   show (OrElim p1 p2 p3) = "orE " ++ show p1 ++ " " ++ show p2 ++ " " ++ show p3
-  show (ImpIntro p1 p2) = "impI " ++ show p1 ++ " " ++ show p2
+  show (ImpIntro p1) = "impI " ++ show p1
   show (ImpElim p1 p2) = "impE " ++ show p1 ++ " " ++ show p2
-  show (DnIntro p) = "dnI " ++ show p
-  show (DnElim p) = "dnE " ++ show p
+  show (Dn p) = "dn " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
 

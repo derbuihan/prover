@@ -22,7 +22,7 @@ specTokenize = do
   it "tactic" $ do
     let input = "assume x1"
         actual = tokenize input
-        expected = [TAssum, TAtom "x1", TEOF]
+        expected = [TAssume, TAtom "x1", TEOF]
     actual `shouldBe` expected
 
 specParseProp :: Spec

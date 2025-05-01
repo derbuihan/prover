@@ -8,22 +8,6 @@ spec :: Spec
 spec = do
   describe "Proof" specProve
 
--- data Tactic
---   = Assume Prop -- Assumption
---   | AndIntro Prop Prop -- And Introduction
---   | AndElimLeft Prop -- And Elimination Left
---   | AndElimRight Prop -- And Elimination Right
---   | OrIntroLeft Prop -- Or Introduction Left
---   | OrIntroRight Prop -- Or Introduction Right
---   | OrElim Prop Prop Prop -- Or Elimination
---   | ImpIntro Prop Prop -- Implication Introduction
---   | ImpElim Prop Prop -- Implication Elimination
---   | DnIntro Prop -- Double Negation Introduction
---   | DnElim Prop -- Double Negation Elimination
---   | Contra Prop Prop -- Contradiction
---   | Done -- Done
---   deriving (Eq)
-
 specProve :: Spec
 specProve = do
   it "assume" $ do
@@ -36,7 +20,7 @@ specProve = do
         actual = prove (Assume (Atom "x")) input
         expected =
           ProofState
-            { goal = Atom "y",
+            { goal = Imp (Atom "x") (Atom "y"),
               assumptions = [Atom "x"],
               tactics = [Assume (Atom "x")]
             }
@@ -49,12 +33,12 @@ specProve = do
               assumptions = [Atom "x", Atom "y"],
               tactics = []
             }
-        actual = prove (AndIntro (Atom "x") (Atom "y")) input
+        actual = prove (AndIntro (And (Atom "x") (Atom "y"))) input
         expected =
           ProofState
             { goal = Atom "x",
               assumptions = [And (Atom "x") (Atom "y"), Atom "x", Atom "y"],
-              tactics = [AndIntro (Atom "x") (Atom "y")]
+              tactics = [AndIntro (And (Atom "x") (Atom "y"))]
             }
     actual `shouldBe` expected
 

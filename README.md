@@ -37,3 +37,19 @@ Current proof state:
 
 Proof completed successfully!
 ```
+
+# Tactics
+
+| Tactic     | example            | Description                                                                |
+| ---------- | ------------------ | -------------------------------------------------------------------------- |
+| assume     | assume x           | add x to assumptions (where x is any prop)                                 |
+| andI       | andI p & q         | add p & q to assumptions (where p, q are in the assumptions)               |
+| andEL      | andEL p & q        | add p to assumptions (where p & q is in the assumptions)                   |
+| andER      | andER p & q        | add q to assumptions (where p & q is in the assumptions)                   |
+| orI        | orI p\|q           | and p \| q to assumptions (where p or q is in the assumptions)             |
+| orE        | orE p\|q p->r q->r | add r to assumptions (where p \| q, p -> r, q -> r are in the assumptions) |
+| impI (cp)  | impI p->q          | add p -> q to assumptions (where p, q are in the assumptions)              |
+| impE (mpp) | impE p p->q        | add q to assumptions (where p, p -> q are in the assumptions)              |
+| dn         | dn p               | add p to assumptions (where ¬¬p is in the assumptions)                     |
+| contra     | contra p !p        | contradiction (where p, ¬p are in the assumptions)                         |
+| done       | done               | complete the proof                                                         |
