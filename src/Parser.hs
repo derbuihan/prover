@@ -106,6 +106,7 @@ parseAtom (TLParen : tokens) =
 parseAtom _ = error "Expected atom or parent"
 
 -- Parser for Assumptions
+
 parseAssumptions :: String -> [Prop]
 parseAssumptions s = map parseProp (splitOn ',' s)
 
@@ -118,6 +119,7 @@ splitOn delim str =
         (_ : rest) -> splitOn delim rest
 
 -- Parser for Tactic
+
 parseTactic :: String -> Tactic
 parseTactic s =
   let tokens = tokenize s

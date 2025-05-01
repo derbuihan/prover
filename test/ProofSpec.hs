@@ -8,9 +8,25 @@ spec :: Spec
 spec = do
   describe "Proof" specProve
 
+-- data Tactic
+--   = Assume Prop -- Assumption
+--   | AndIntro Prop Prop -- And Introduction
+--   | AndElimLeft Prop -- And Elimination Left
+--   | AndElimRight Prop -- And Elimination Right
+--   | OrIntroLeft Prop -- Or Introduction Left
+--   | OrIntroRight Prop -- Or Introduction Right
+--   | OrElim Prop Prop Prop -- Or Elimination
+--   | ImpIntro Prop Prop -- Implication Introduction
+--   | ImpElim Prop Prop -- Implication Elimination
+--   | DnIntro Prop -- Double Negation Introduction
+--   | DnElim Prop -- Double Negation Elimination
+--   | Contra Prop Prop -- Contradiction
+--   | Done -- Done
+--   deriving (Eq)
+
 specProve :: Spec
 specProve = do
-  it "assum" $ do
+  it "assume" $ do
     let input =
           ProofState
             { goal = Imp (Atom "x") (Atom "y"),
@@ -26,35 +42,35 @@ specProve = do
             }
     actual `shouldBe` expected
 
-  it "modus ponens" $ do
+  it "and introduction" $ do
     let input =
           ProofState
-            { goal = Atom "y",
-              assumptions = [Imp (Atom "x") (Atom "y"), Atom "x"],
-              tactics = [Assume (Imp (Atom "x") (Atom "y")), Assume (Atom "x")]
+            { goal = Atom "x",
+              assumptions = [Atom "x", Atom "y"],
+              tactics = []
             }
-        actual = prove (ImpElim (Imp (Atom "x") (Atom "y")) (Atom "x")) input
+        actual = prove (AndIntro (Atom "x") (Atom "y")) input
         expected =
           ProofState
-            { goal = Atom "y",
-              assumptions = [Atom "y", Imp (Atom "x") (Atom "y"), Atom "x"],
-              tactics = [ImpElim (Imp (Atom "x") (Atom "y")) (Atom "x"), Assume (Imp (Atom "x") (Atom "y")), Assume (Atom "x")]
+            { goal = Atom "x",
+              assumptions = [And (Atom "x") (Atom "y"), Atom "x", Atom "y"],
+              tactics = [AndIntro (Atom "x") (Atom "y")]
             }
     actual `shouldBe` expected
 
-  it "double negation elimination" $ do
+  it "and elimination left" $ do
     let input =
           ProofState
             { goal = Atom "x",
-              assumptions = [Not (Not (Atom "x"))],
+              assumptions = [And (Atom "x") (Atom "y")],
               tactics = []
             }
-        actual = prove (DnElim (Not (Not (Atom "x")))) input
+        actual = prove (AndElimLeft (And (Atom "x") (Atom "y"))) input
         expected =
           ProofState
             { goal = Atom "x",
-              assumptions = [Atom "x", Not (Not (Atom "x"))],
-              tactics = [DnElim (Not (Not (Atom "x")))]
+              assumptions = [Atom "x", And (Atom "x") (Atom "y")],
+              tactics = [AndElimLeft (And (Atom "x") (Atom "y"))]
             }
     actual `shouldBe` expected
 

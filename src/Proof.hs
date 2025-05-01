@@ -2,12 +2,37 @@ module Proof where
 
 import Types
 
+-- data Tactic
+--   = Assume Prop -- Assumption
+--   | AndIntro Prop Prop -- And Introduction
+--   | AndElimLeft Prop -- And Elimination Left
+--   | AndElimRight Prop -- And Elimination Right
+--   | OrIntroLeft Prop -- Or Introduction Left
+--   | OrIntroRight Prop -- Or Introduction Right
+--   | OrElim Prop Prop Prop -- Or Elimination
+--   | ImpIntro Prop Prop -- Implication Introduction
+--   | ImpElim Prop Prop -- Implication Elimination
+--   | DnIntro Prop -- Double Negation Introduction
+--   | DnElim Prop -- Double Negation Elimination
+--   | Contra Prop Prop -- Contradiction
+--   | Done -- Done
+--   deriving (Eq)
+
 prove :: Tactic -> ProofState -> ProofState
-prove (Assume prop) state = proveAssum prop state
-prove (ImpElim pq p) state = proveModusPonens pq p state
-prove (DnElim prop) state = proveDoubleNegationElim prop state
+prove (Assume p) state = proveAssum p state
+prove (AndIntro p q) state = proveAndIntro p q state
+prove (AndElimLeft p) state = proveAndElimLeft p state
+prove (AndElimRight q) state = proveAndElimRight q state
+-- prove (OrIntro p) state = proveOrIntro p q state
+-- prove (OrElim p q r) state = proveOrElim p q r state
+-- prove (ImpIntro p q) state = proveImpIntro p q state
+-- prove (ImpElim pq p) state = proveImpElim pq p state
+-- prove (DnIntro p) state = proveDnIntro p state
+-- prove (DnElim p) state = proveDnElim p state
+-- prove (Contra p q) state = proveContra p q state
 prove Done state = proveDone state
-prove _ _ = error "Invalid tactic"
+prove _ _ =
+  error "Invalid tactic"
 
 proveAssum :: Prop -> ProofState -> ProofState
 proveAssum prop state@ProofState {goal = Imp left right}
@@ -22,31 +47,42 @@ proveAssum prop state@ProofState {goal = Imp left right}
 proveAssum _ _ =
   error "Assumption is not valid in the current context"
 
-proveModusPonens :: Prop -> Prop -> ProofState -> ProofState
-proveModusPonens (Imp p q) p_ state
-  | isInAssumptions (Imp p q) state && isInAssumptions p_ state && p == p_ =
+proveAndIntro :: Prop -> Prop -> ProofState -> ProofState
+proveAndIntro p q state
+  | isInAssumptions p state && isInAssumptions q state =
       ProofState
         { goal = goal state,
-          assumptions = q : assumptions state,
-          tactics = ImpElim (Imp p q) p_ : tactics state
+          assumptions = And p q : assumptions state,
+          tactics = AndIntro p q : tactics state
         }
   | otherwise =
-      error "Modus Ponens is not valid in the current context"
-proveModusPonens _ _ _ =
-  error "Modus Ponens is not valid in the current context"
+      error "And Introduction is not valid in the current context"
 
-proveDoubleNegationElim :: Prop -> ProofState -> ProofState
-proveDoubleNegationElim (Not (Not p)) state
-  | isInAssumptions (Not (Not p)) state =
+proveAndElimLeft :: Prop -> ProofState -> ProofState
+proveAndElimLeft (And p q) state
+  | isInAssumptions (And p q) state =
       ProofState
         { goal = goal state,
           assumptions = p : assumptions state,
-          tactics = DnElim (Not (Not p)) : tactics state
+          tactics = AndElimLeft (And p q) : tactics state
         }
   | otherwise =
-      error "Double negation elimination is not valid in the current context"
-proveDoubleNegationElim _ _ =
-  error "Double negation elimination is not valid in the current context"
+      error "And Elimination Left is not valid in the current context"
+proveAndElimLeft _ _ =
+  error "And Elimination Left is not valid in the current context"
+
+proveAndElimRight :: Prop -> ProofState -> ProofState
+proveAndElimRight (And p q) state
+  | isInAssumptions (And p q) state =
+      ProofState
+        { goal = goal state,
+          assumptions = q : assumptions state,
+          tactics = AndElimRight (And p q) : tactics state
+        }
+  | otherwise =
+      error "And Elimination Right is not valid in the current context"
+proveAndElimRight _ _ =
+  error "And Elimination Right is not valid in the current context"
 
 proveDone :: ProofState -> ProofState
 proveDone state

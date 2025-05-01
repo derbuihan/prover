@@ -27,7 +27,7 @@ specTokenize = do
 
 specParseProp :: Spec
 specParseProp = do
-  it "Atomiable" $ do
+  it "atom" $ do
     let input = "x1"
         actual = parseProp input
         expected = Atom "x1"
