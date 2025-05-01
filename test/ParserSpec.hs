@@ -16,69 +16,69 @@ specTokenize = do
   it "prop" $ do
     let input = "x1 & y11 | !z123"
         actual = tokenize input
-        expected = [TVar "x1", TAnd, TVar "y11", TOr, TNot, TVar "z123", TEOF]
+        expected = [TAtom "x1", TAnd, TAtom "y11", TOr, TNot, TAtom "z123", TEOF]
     actual `shouldBe` expected
 
   it "tactic" $ do
-    let input = "assum x1"
+    let input = "assume x1"
         actual = tokenize input
-        expected = [TAssum, TVar "x1", TEOF]
+        expected = [TAssum, TAtom "x1", TEOF]
     actual `shouldBe` expected
 
 specParseProp :: Spec
 specParseProp = do
-  it "variable" $ do
+  it "Atomiable" $ do
     let input = "x1"
         actual = parseProp input
-        expected = Var "x1"
+        expected = Atom "x1"
     actual `shouldBe` expected
 
   it "negation" $ do
     let input = "!x1"
         actual = parseProp input
-        expected = Not (Var "x1")
+        expected = Not (Atom "x1")
     actual `shouldBe` expected
 
   it "conjunction" $ do
     let input = "x1 & y11"
         actual = parseProp input
-        expected = And (Var "x1") (Var "y11")
+        expected = And (Atom "x1") (Atom "y11")
     actual `shouldBe` expected
 
   it "disjunction" $ do
     let input = "x1 | y11"
         actual = parseProp input
-        expected = Or (Var "x1") (Var "y11")
+        expected = Or (Atom "x1") (Atom "y11")
     actual `shouldBe` expected
 
   it "complex expression" $ do
     let input = "x1 & y11 | !z123"
         actual = parseProp input
-        expected = Or (And (Var "x1") (Var "y11")) (Not (Var "z123"))
+        expected = Or (And (Atom "x1") (Atom "y11")) (Not (Atom "z123"))
     actual `shouldBe` expected
 
   it "implication" $ do
     let input = "x1 -> y11"
         actual = parseProp input
-        expected = Imply (Var "x1") (Var "y11")
+        expected = Imp (Atom "x1") (Atom "y11")
     actual `shouldBe` expected
 
   it "biconditional" $ do
     let input = "x1 <-> y11"
         actual = parseProp input
-        expected = Iff (Var "x1") (Var "y11")
+        expected = Iff (Atom "x1") (Atom "y11")
     actual `shouldBe` expected
 
   it "nested expressions" $ do
     let input = "x1 & (y11 | !z123)"
         actual = parseProp input
-        expected = And (Var "x1") (Or (Var "y11") (Not (Var "z123")))
+        expected = And (Atom "x1") (Or (Atom "y11") (Not (Atom "z123")))
     actual `shouldBe` expected
 
   it "multiple operators" $ do
     let input = "!(x & y) <-> !x | !y"
         actual = parseProp input
-        expected = Iff (Not (And (Var "x") (Var "y"))) (Or (Not (Var "x")) (Not (Var "y")))
+        expected = Iff (Not (And (Atom "x") (Atom "y"))) (Or (Not (Atom "x")) (Not (Atom "y")))
     actual `shouldBe` expected
 
 specParseAssumptions :: Spec
@@ -86,13 +86,13 @@ specParseAssumptions = do
   it "single assumption" $ do
     let input = "x1"
         actual = parseAssumptions input
-        expected = [Var "x1"]
+        expected = [Atom "x1"]
     actual `shouldBe` expected
 
   it "multiple assumptions" $ do
     let input = "x1, y11, !z123"
         actual = parseAssumptions input
-        expected = [Var "x1", Var "y11", Not (Var "z123")]
+        expected = [Atom "x1", Atom "y11", Not (Atom "z123")]
     actual `shouldBe` expected
 
   it "empty assumptions" $ do
@@ -104,9 +104,9 @@ specParseAssumptions = do
 specParseTactic :: Spec
 specParseTactic = do
   it "assume" $ do
-    let input = "assum x1"
+    let input = "assume x1"
         actual = parseTactic input
-        expected = Assum (Var "x1")
+        expected = Assume (Atom "x1")
     actual `shouldBe` expected
 
   it "done" $ do

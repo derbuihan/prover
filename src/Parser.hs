@@ -13,7 +13,7 @@ tokenize ('&' : xs) = TAnd : tokenize xs
 tokenize ('|' : xs) = TOr : tokenize xs
 tokenize ('(' : xs) = TLParen : tokenize xs
 tokenize (')' : xs) = TRParen : tokenize xs
-tokenize ('-' : '>' : xs) = TImply : tokenize xs
+tokenize ('-' : '>' : xs) = TImp : tokenize xs
 tokenize ('<' : '-' : '>' : xs) = TIff : tokenize xs
 tokenize (x : xs)
   | isAlpha x =
@@ -24,12 +24,20 @@ tokenize (x : xs)
 convertKeywords :: String -> Token
 convertKeywords keyword =
   case keyword of
-    "assum" -> TAssum
-    "mpp" -> TModusPonens
-    "dn" -> TDoubleNegationElim
-    "apply" -> TApply
+    "assume" -> TAssum
+    "andI" -> TAndIntro
+    "andEL" -> TAndElimLeft
+    "andER" -> TAndElimRight
+    "orIL" -> TOrIntroLeft
+    "orIR" -> TOrIntroRight
+    "orE" -> TOrElim
+    "impI" -> TImpIntro
+    "impE" -> TImpElim
+    "dnI" -> TDnIntro
+    "dnE" -> TDnElim
+    "contra" -> TContra
     "done" -> TDone
-    _ -> TVar keyword
+    _ -> TAtom keyword
 
 -- Parser for Prop
 
@@ -44,7 +52,7 @@ parseProp s =
         _ -> error "Parsing failed, unexpected tokens remaining"
 
 parseProp_ :: Parser Prop
-parseProp_ tokens = parseIff tokens
+parseProp_ = parseIff
 
 parseIff :: Parser Prop
 parseIff tokens =
@@ -59,9 +67,9 @@ parseImply :: Parser Prop
 parseImply tokens =
   let (left, rest) = parseOr tokens
    in case rest of
-        (TImply : rest') ->
+        (TImp : rest') ->
           let (right, rest'') = parseImply rest'
-           in (Imply left right, rest'')
+           in (Imp left right, rest'')
         _ -> (left, rest)
 
 parseOr :: Parser Prop
@@ -86,20 +94,20 @@ parseNot :: Parser Prop
 parseNot (TNot : tokens) =
   let (prop, rest) = parseNot tokens
    in (Not prop, rest)
-parseNot tokens = parseVar tokens
+parseNot tokens = parseAtom tokens
 
-parseVar :: Parser Prop
-parseVar (TVar var : tokens) = (Var var, tokens)
-parseVar (TLParen : tokens) =
+parseAtom :: Parser Prop
+parseAtom (TAtom s : tokens) = (Atom s, tokens)
+parseAtom (TLParen : tokens) =
   let (prop, rest) = parseIff tokens
    in case rest of
         (TRParen : rest') -> (prop, rest')
         _ -> error "Expected closing parenthesis"
-parseVar _ = error "Expected variable"
+parseAtom _ = error "Expected atom or parent"
 
 -- Parser for Assumptions
 parseAssumptions :: String -> [Prop]
-parseAssumptions s = map parseProp ( splitOn ',' s)
+parseAssumptions s = map parseProp (splitOn ',' s)
 
 splitOn :: Char -> String -> [String]
 splitOn _ [] = []
@@ -121,13 +129,45 @@ parseTactic s =
 parseTactic_ :: Parser Tactic
 parseTactic_ (TAssum : tokens) =
   let (prop, rest) = parseProp_ tokens
-   in (Assum prop, rest)
-parseTactic_ (TModusPonens : tokens) =
+   in (Assume prop, rest)
+parseTactic_ (TAndIntro : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest
-   in (ModusPonens p q, rest_)
-parseTactic_ (TDoubleNegationElim : tokens) =
+   in (AndIntro p q, rest_)
+parseTactic_ (TAndElimLeft : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (AndElimLeft p, rest)
+parseTactic_ (TAndElimRight : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (AndElimRight p, rest)
+parseTactic_ (TOrIntroLeft : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (OrIntroLeft p, rest)
+parseTactic_ (TOrIntroRight : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (OrIntroRight p, rest)
+parseTactic_ (TOrElim : tokens) =
+  let (p, rest) = parseProp_ tokens
+      (q, rest_) = parseProp_ rest
+      (r, rest__) = parseProp_ rest_
+   in (OrElim p q r, rest__)
+parseTactic_ (TImpIntro : tokens) =
+  let (p, rest) = parseProp_ tokens
+      (q, rest_) = parseProp_ rest
+   in (ImpIntro p q, rest_)
+parseTactic_ (TImpElim : tokens) =
+  let (p, rest) = parseProp_ tokens
+      (q, rest_) = parseProp_ rest
+   in (ImpElim p q, rest_)
+parseTactic_ (TDnIntro : tokens) =
   let (prop, rest) = parseProp_ tokens
-   in (DoubleNegationElim prop, rest)
+   in (DnIntro prop, rest)
+parseTactic_ (TDnElim : tokens) =
+  let (prop, rest) = parseProp_ tokens
+   in (DnElim prop, rest)
+parseTactic_ (TContra : tokens) =
+  let (p, rest) = parseProp_ tokens
+      (q, rest_) = parseProp_ rest
+   in (Contra p q, rest_)
 parseTactic_ (TDone : tokens) = (Done, tokens)
-parseTactic_ _ = error "Expected tactic"
+parseTactic_ _ = error "Invalid tactic"

@@ -13,63 +13,63 @@ specProve = do
   it "assum" $ do
     let input =
           ProofState
-            { goal = Imply (Var "x") (Var "y"),
+            { goal = Imp (Atom "x") (Atom "y"),
               assumptions = [],
               tactics = []
             }
-        actual = prove (Assum (Var "x")) input
+        actual = prove (Assume (Atom "x")) input
         expected =
           ProofState
-            { goal = Var "y",
-              assumptions = [Var "x"],
-              tactics = [Assum (Var "x")]
+            { goal = Atom "y",
+              assumptions = [Atom "x"],
+              tactics = [Assume (Atom "x")]
             }
     actual `shouldBe` expected
 
   it "modus ponens" $ do
     let input =
           ProofState
-            { goal = Var "y",
-              assumptions = [Imply (Var "x") (Var "y"), Var "x"],
-              tactics = [Assum (Imply (Var "x") (Var "y")), Assum (Var "x")]
+            { goal = Atom "y",
+              assumptions = [Imp (Atom "x") (Atom "y"), Atom "x"],
+              tactics = [Assume (Imp (Atom "x") (Atom "y")), Assume (Atom "x")]
             }
-        actual = prove (ModusPonens (Imply (Var "x") (Var "y")) (Var "x")) input
+        actual = prove (ImpElim (Imp (Atom "x") (Atom "y")) (Atom "x")) input
         expected =
           ProofState
-            { goal = Var "y",
-              assumptions = [Var "y", Imply (Var "x") (Var "y"), Var "x"],
-              tactics = [ModusPonens (Imply (Var "x") (Var "y")) (Var "x"), Assum (Imply (Var "x") (Var "y")), Assum (Var "x")]
+            { goal = Atom "y",
+              assumptions = [Atom "y", Imp (Atom "x") (Atom "y"), Atom "x"],
+              tactics = [ImpElim (Imp (Atom "x") (Atom "y")) (Atom "x"), Assume (Imp (Atom "x") (Atom "y")), Assume (Atom "x")]
             }
     actual `shouldBe` expected
 
   it "double negation elimination" $ do
     let input =
           ProofState
-            { goal = Var "x",
-              assumptions = [Not (Not (Var "x"))],
+            { goal = Atom "x",
+              assumptions = [Not (Not (Atom "x"))],
               tactics = []
             }
-        actual = prove (DoubleNegationElim (Not (Not (Var "x")))) input
+        actual = prove (DnElim (Not (Not (Atom "x")))) input
         expected =
           ProofState
-            { goal = Var "x",
-              assumptions = [Var "x", Not (Not (Var "x"))],
-              tactics = [DoubleNegationElim (Not (Not (Var "x")))]
+            { goal = Atom "x",
+              assumptions = [Atom "x", Not (Not (Atom "x"))],
+              tactics = [DnElim (Not (Not (Atom "x")))]
             }
     actual `shouldBe` expected
 
   it "done" $ do
     let input =
           ProofState
-            { goal = Var "x",
-              assumptions = [Var "x"],
+            { goal = Atom "x",
+              assumptions = [Atom "x"],
               tactics = []
             }
         actual = prove Done input
         expected =
           ProofState
-            { goal = Var "x",
-              assumptions = [Var "x"],
+            { goal = Atom "x",
+              assumptions = [Atom "x"],
               tactics = [Done]
             }
     actual `shouldBe` expected

@@ -1,0 +1,9 @@
+{
+  "haskell.manageHLS": "GHCup",
+  "[haskell]": {
+    "editor.defaultFormatter": "haskell.haskell",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}
