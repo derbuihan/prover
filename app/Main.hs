@@ -24,34 +24,6 @@ initState parsedGoal parsedAssum =
       tactics = []
     }
 
--- main :: IO ()
--- main = do
---   print testState
---   loop testState
-
-testState :: ProofState
-testState =
-  ProofState
-    { goal = Or (Atom "p") (Not (Atom "p")),
-      assumptions = [],
-      subProofs =
-        [ ProofState
-            { goal = Falsum,
-              assumptions = [Not (Or (Atom "p") (Not (Atom "p")))],
-              subProofs =
-                [ ProofState
-                    { goal = Falsum,
-                      assumptions = [Falsum, Not (Atom "p"), Not (Or (Atom "p") (Not (Atom "p")))],
-                      subProofs = [],
-                      tactics = []
-                    }
-                ],
-              tactics = [Assume (Not (Atom "p"))]
-            }
-        ],
-      tactics = [Assume (Not (Or (Atom "p") (Not (Atom "p"))))]
-    }
-
 loop :: ProofState -> IO ()
 loop state = do
   print state

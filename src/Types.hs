@@ -84,12 +84,12 @@ data ProofState = ProofState
 printState :: Int -> ProofState -> String
 printState _ (ProofState _ _ _ (Done : _)) = ""
 printState indent (ProofState g a s t) =
-  unlines
+  unlines $
     [ replicate indent ' ' ++ "Goal: " ++ show g,
       replicate indent ' ' ++ "Assumptions: " ++ show a,
       replicate indent ' ' ++ "Tactics: " ++ show t
     ]
-    ++ unlines (map (printState (indent + 2)) s)
+      ++ map (printState (indent + 2)) s
 
 instance Show ProofState where
   show = printState 0
