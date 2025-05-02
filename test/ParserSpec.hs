@@ -27,6 +27,12 @@ specTokenize = do
 
 specParseProp :: Spec
 specParseProp = do
+  it "falsum" $ do
+    let input = "False"
+        actual = parseProp input
+        expected = Falsum
+    actual `shouldBe` expected
+
   it "atom" $ do
     let input = "x1"
         actual = parseProp input

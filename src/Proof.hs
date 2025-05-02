@@ -18,6 +18,7 @@ update_ tactic (x : xs)
 
 prove :: Tactic -> ProofState -> ProofState
 prove (Assume x) state = proveAssume x state
+prove (Suppose x) state = proveSuppose x state
 prove (AndIntro pq) state = proveAndIntro pq state
 prove (AndElimLeft p) state = proveAndElimLeft p state
 prove (AndElimRight q) state = proveAndElimRight q state
@@ -30,7 +31,20 @@ prove (Contra p np) state = proveContra p np state
 prove Done state = proveDone state
 
 proveAssume :: Prop -> ProofState -> ProofState
-proveAssume x state =
+proveAssume p state@(ProofState (Imp p_ q) _ _ _)
+  | p == p_ =
+      state
+        { goal = q,
+          assumptions = p : assumptions state,
+          tactics = Assume (Imp p q) : tactics state
+        }
+  | otherwise =
+      error "Assumption must be an implication"
+proveAssume _ _ =
+  error "Assumption must be an implication"
+
+proveSuppose :: Prop -> ProofState -> ProofState
+proveSuppose x state =
   let subProof =
         state
           { goal = Falsum,

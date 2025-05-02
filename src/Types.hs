@@ -12,6 +12,7 @@ data Token
   | TRParen -- )
   | TEOF -- end of file
   | TAssume -- assumption
+  | TSuppose -- suppose
   | TAndIntro -- and introduction
   | TAndElimLeft -- and elimination left
   | TAndElimRight -- and elimination right
@@ -45,6 +46,7 @@ instance Show Prop where
 
 data Tactic
   = Assume Prop -- Assumption
+  | Suppose Prop -- Suppose
   | AndIntro Prop -- And Introduction
   | AndElimLeft Prop -- And Elimination Left
   | AndElimRight Prop -- And Elimination Right
@@ -59,6 +61,7 @@ data Tactic
 
 instance Show Tactic where
   show (Assume p) = "assume " ++ show p
+  show (Suppose p) = "suppose " ++ show p
   show (AndIntro p1) = "andI " ++ show p1
   show (AndElimLeft p) = "andEL " ++ show p
   show (AndElimRight p) = "andER " ++ show p

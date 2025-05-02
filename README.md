@@ -135,7 +135,8 @@ Proof completed successfully!
 
 | Tactic     | example            | Description                                                                         |
 | ---------- | ------------------ | ----------------------------------------------------------------------------------- |
-| assume     | assume x           | add x to assumptions (where x is any prop)                                          |
+| assume     | assume x           | add x to assumptions (where x is the antecedent of the goal)                        |
+| suppose    | suppose x          | assume x for RAA (where x is any proposition)                                       |
 | andI       | andI p & q         | add p & q to assumptions (where p, q are in the assumptions)                        |
 | andEL      | andEL p & q        | add p to assumptions (where p & q is in the assumptions)                            |
 | andER      | andER p & q        | add q to assumptions (where p & q is in the assumptions)                            |

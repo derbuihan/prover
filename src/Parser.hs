@@ -28,6 +28,7 @@ convertKeywords keyword =
     "Falsum" -> TFalsum
     "⊥" -> TFalsum
     "assume" -> TAssume
+    "suppose" -> TSuppose
     "andI" -> TAndIntro
     "andEL" -> TAndElimLeft
     "andER" -> TAndElimRight
@@ -136,6 +137,9 @@ parseTactic_ :: Parser Tactic
 parseTactic_ (TAssume : tokens) =
   let (prop, rest) = parseProp_ tokens
    in (Assume prop, rest)
+parseTactic_ (TSuppose : tokens) =
+  let (prop, rest) = parseProp_ tokens
+   in (Suppose prop, rest)
 parseTactic_ (TAndIntro : tokens) =
   let (p, rest) = parseProp_ tokens
    in (AndIntro p, rest)

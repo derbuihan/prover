@@ -11,23 +11,23 @@ spec = do
 
 specProve :: Spec
 specProve = do
-  -- it "assume" $ do
-  --   let input =
-  --         ProofState
-  --           { goal = Imp (Atom "x") (Atom "y"),
-  --             assumptions = [],
-  --             subProofs = [],
-  --             tactics = []
-  --           }
-  --       actual = prove (Assume (Atom "x")) input
-  --       expected =
-  --         ProofState
-  --           { goal = Imp (Atom "x") (Atom "y"),
-  --             assumptions = [Atom "x"],
-  --             subProofs = [],
-  --             tactics = [Assume (Atom "x")]
-  --           }
-  --   actual `shouldBe` expected
+  it "assume" $ do
+    let input =
+          ProofState
+            { goal = Imp (Atom "x") (Atom "y"),
+              assumptions = [],
+              subProofs = [],
+              tactics = []
+            }
+        actual = prove (Assume (Atom "x")) input
+        expected =
+          ProofState
+            { goal = Imp (Atom "x") (Atom "y"),
+              assumptions = [Atom "x"],
+              subProofs = [],
+              tactics = [Assume (Atom "x")]
+            }
+    actual `shouldBe` expected
 
   it "and introduction" $ do
     let input =
