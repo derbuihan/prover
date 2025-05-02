@@ -1,7 +1,8 @@
 module Types where
 
 data Token
-  = TAtom String -- x, y
+  = TFalsum -- ⊥, False
+  | TAtom String -- x, y
   | TNot -- !
   | TAnd -- &
   | TOr
@@ -24,7 +25,8 @@ data Token
   deriving (Eq, Show)
 
 data Prop
-  = Atom String -- x, y
+  = Falsum -- ⊥, False
+  | Atom String -- x, y
   | Not Prop -- !x
   | And Prop Prop -- x & y
   | Or Prop Prop -- x | y
@@ -33,6 +35,7 @@ data Prop
   deriving (Eq)
 
 instance Show Prop where
+  show Falsum = "⊥"
   show (Atom s) = s
   show (Not p) = "!" ++ show p
   show (And p1 p2) = "(" ++ show p1 ++ " & " ++ show p2 ++ ")"
@@ -75,10 +78,15 @@ data ProofState = ProofState
   }
   deriving (Eq)
 
+printState :: Int -> ProofState -> String
+printState _ (ProofState _ _ _ (Done : _)) = ""
+printState indent (ProofState g a s t) =
+  unlines
+    [ replicate indent ' ' ++ "Goal: " ++ show g,
+      replicate indent ' ' ++ "Assumptions: " ++ show a,
+      replicate indent ' ' ++ "Tactics: " ++ show t
+    ]
+    ++ unlines (map (printState (indent + 2)) s)
+
 instance Show ProofState where
-  show (ProofState g a _ t) =
-    unlines $
-      [ "    Goal: " ++ show g,
-        "    Assumptions: " ++ show a,
-        "    Tactics: " ++ show t
-      ]
+  show = printState 0

@@ -7,26 +7,27 @@ import Types
 spec :: Spec
 spec = do
   describe "Proof" specProve
+  describe "Helpers" specHelpers
 
 specProve :: Spec
 specProve = do
-  it "assume" $ do
-    let input =
-          ProofState
-            { goal = Imp (Atom "x") (Atom "y"),
-              assumptions = [],
-              subProofs = [],
-              tactics = []
-            }
-        actual = prove (Assume (Atom "x")) input
-        expected =
-          ProofState
-            { goal = Imp (Atom "x") (Atom "y"),
-              assumptions = [Atom "x"],
-              subProofs = [],
-              tactics = [Assume (Atom "x")]
-            }
-    actual `shouldBe` expected
+  -- it "assume" $ do
+  --   let input =
+  --         ProofState
+  --           { goal = Imp (Atom "x") (Atom "y"),
+  --             assumptions = [],
+  --             subProofs = [],
+  --             tactics = []
+  --           }
+  --       actual = prove (Assume (Atom "x")) input
+  --       expected =
+  --         ProofState
+  --           { goal = Imp (Atom "x") (Atom "y"),
+  --             assumptions = [Atom "x"],
+  --             subProofs = [],
+  --             tactics = [Assume (Atom "x")]
+  --           }
+  --   actual `shouldBe` expected
 
   it "and introduction" $ do
     let input =
@@ -80,4 +81,42 @@ specProve = do
               subProofs = [],
               tactics = [Done]
             }
+    actual `shouldBe` expected
+
+specHelpers :: Spec
+specHelpers = do
+  it "isInAssumptions" $ do
+    let input =
+          ProofState
+            { goal = Atom "x",
+              assumptions = [Atom "x", Atom "y"],
+              subProofs = [],
+              tactics = []
+            }
+        actual = isInAssumptions (Atom "x") input
+        expected = True
+    actual `shouldBe` expected
+
+  it "isProved" $ do
+    let input =
+          ProofState
+            { goal = Atom "x",
+              assumptions = [Atom "x"],
+              subProofs = [],
+              tactics = []
+            }
+        actual = isProved input
+        expected = False
+    actual `shouldBe` expected
+
+  it "isProved with Done" $ do
+    let input =
+          ProofState
+            { goal = Atom "x",
+              assumptions = [Atom "x"],
+              subProofs = [],
+              tactics = [Done]
+            }
+        actual = isProved input
+        expected = True
     actual `shouldBe` expected

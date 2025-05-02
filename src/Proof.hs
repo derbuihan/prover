@@ -2,6 +2,20 @@ module Proof where
 
 import Types
 
+update :: Tactic -> ProofState -> ProofState
+update tactic state
+  | all isProved (subProofs state) = prove tactic state
+  | otherwise =
+      state
+        { subProofs = update_ tactic (subProofs state)
+        }
+
+update_ :: Tactic -> [ProofState] -> [ProofState]
+update_ _ [] = []
+update_ tactic (x : xs)
+  | not (isProved x) = update tactic x : xs
+  | otherwise = x : update_ tactic xs
+
 prove :: Tactic -> ProofState -> ProofState
 prove (Assume x) state = proveAssume x state
 prove (AndIntro pq) state = proveAndIntro pq state
@@ -17,10 +31,18 @@ prove Done state = proveDone state
 
 proveAssume :: Prop -> ProofState -> ProofState
 proveAssume x state =
-  state
-    { assumptions = x : assumptions state,
-      tactics = Assume x : tactics state
-    }
+  let subProof =
+        state
+          { goal = Falsum,
+            assumptions = x : assumptions state,
+            subProofs = [],
+            tactics = []
+          }
+   in state
+        { assumptions = Not x : assumptions state,
+          subProofs = subProof : subProofs state,
+          tactics = Assume x : tactics state
+        }
 
 proveAndIntro :: Prop -> ProofState -> ProofState
 proveAndIntro (And p q) state
@@ -125,9 +147,9 @@ proveDn _ _ =
 
 proveContra :: Prop -> Prop -> ProofState -> ProofState
 proveContra p (Not p_) state
-  | isInAssumptions p state && isInAssumptions (Not p_) state && p == p_ =
+  | isInAssumptions p state && isInAssumptions (Not p_) state && p == p_ && goal state == Falsum =
       state
-        { assumptions = Not p_ : assumptions state,
+        { assumptions = Falsum : assumptions state,
           tactics = Contra p (Not p_) : tactics state
         }
   | otherwise =
@@ -142,6 +164,15 @@ proveDone state
   | otherwise =
       error "Proof is not complete, assumptions do not match the goal"
 
+-- Helper functions
+
 isInAssumptions :: Prop -> ProofState -> Bool
 isInAssumptions prop state =
   prop `elem` assumptions state
+
+isProved :: ProofState -> Bool
+isProved state =
+  case tactics state of
+    [] -> False
+    (Done : _) -> True
+    _ -> False

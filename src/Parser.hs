@@ -24,6 +24,9 @@ tokenize (x : xs)
 convertKeywords :: String -> Token
 convertKeywords keyword =
   case keyword of
+    "False" -> TFalsum
+    "Falsum" -> TFalsum
+    "⊥" -> TFalsum
     "assume" -> TAssume
     "andI" -> TAndIntro
     "andEL" -> TAndElimLeft
@@ -97,6 +100,7 @@ parseNot (TNot : tokens) =
 parseNot tokens = parseAtom tokens
 
 parseAtom :: Parser Prop
+parseAtom (TFalsum : tokens) = (Falsum, tokens)
 parseAtom (TAtom s : tokens) = (Atom s, tokens)
 parseAtom (TLParen : tokens) =
   let (prop, rest) = parseIff tokens

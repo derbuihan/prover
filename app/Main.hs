@@ -20,23 +20,48 @@ initState parsedGoal parsedAssum =
   ProofState
     { goal = parsedGoal,
       assumptions = parsedAssum,
+      subProofs = [],
       tactics = []
     }
 
-printState :: ProofState -> IO ()
-printState state = do
-  putStrLn "Current proof state:"
-  print state
+-- main :: IO ()
+-- main = do
+--   print testState
+--   loop testState
+
+testState :: ProofState
+testState =
+  ProofState
+    { goal = Or (Atom "p") (Not (Atom "p")),
+      assumptions = [],
+      subProofs =
+        [ ProofState
+            { goal = Falsum,
+              assumptions = [Not (Or (Atom "p") (Not (Atom "p")))],
+              subProofs =
+                [ ProofState
+                    { goal = Falsum,
+                      assumptions = [Falsum, Not (Atom "p"), Not (Or (Atom "p") (Not (Atom "p")))],
+                      subProofs = [],
+                      tactics = []
+                    }
+                ],
+              tactics = [Assume (Not (Atom "p"))]
+            }
+        ],
+      tactics = [Assume (Not (Or (Atom "p") (Not (Atom "p"))))]
+    }
 
 loop :: ProofState -> IO ()
 loop state = do
-  printState state
+  print state
   putStrLn "Enter a step: "
   stepInput <- getLine
   let tactic = parseTactic stepInput
-      newState = prove tactic state
-  case head (tactics newState) of
-    Done -> do
-      printState newState
+      newState = update tactic state
+  if isProved newState
+    then do
+      print newState
       putStrLn "Proof completed successfully!"
-    _ -> loop newState
+    else
+      loop newState
