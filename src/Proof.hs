@@ -17,18 +17,16 @@ prove Done state = proveDone state
 
 proveAssume :: Prop -> ProofState -> ProofState
 proveAssume x state =
-  ProofState
-    { goal = goal state,
-      assumptions = x : assumptions state,
+  state
+    { assumptions = x : assumptions state,
       tactics = Assume x : tactics state
     }
 
 proveAndIntro :: Prop -> ProofState -> ProofState
 proveAndIntro (And p q) state
   | isInAssumptions p state && isInAssumptions q state =
-      ProofState
-        { goal = goal state,
-          assumptions = And p q : assumptions state,
+      state
+        { assumptions = And p q : assumptions state,
           tactics = AndIntro (And p q) : tactics state
         }
   | otherwise =
@@ -39,9 +37,8 @@ proveAndIntro _ _ =
 proveAndElimLeft :: Prop -> ProofState -> ProofState
 proveAndElimLeft (And p q) state
   | isInAssumptions (And p q) state =
-      ProofState
-        { goal = goal state,
-          assumptions = p : assumptions state,
+      state
+        { assumptions = p : assumptions state,
           tactics = AndElimLeft (And p q) : tactics state
         }
   | otherwise =
@@ -52,9 +49,8 @@ proveAndElimLeft _ _ =
 proveAndElimRight :: Prop -> ProofState -> ProofState
 proveAndElimRight (And p q) state
   | isInAssumptions (And p q) state =
-      ProofState
-        { goal = goal state,
-          assumptions = q : assumptions state,
+      state
+        { assumptions = q : assumptions state,
           tactics = AndElimRight (And p q) : tactics state
         }
   | otherwise =
@@ -65,9 +61,8 @@ proveAndElimRight _ _ =
 proveOrIntro :: Prop -> ProofState -> ProofState
 proveOrIntro (Or p q) state
   | isInAssumptions p state || isInAssumptions q state =
-      ProofState
-        { goal = goal state,
-          assumptions = Or p q : assumptions state,
+      state
+        { assumptions = Or p q : assumptions state,
           tactics = OrIntro (Or p q) : tactics state
         }
   | otherwise =
@@ -83,9 +78,8 @@ proveOrElim (Or p q) (Imp p_ r) (Imp q_ r_) state
       && p == p_
       && q == q_
       && r == r_ =
-      ProofState
-        { goal = goal state,
-          assumptions = r : assumptions state,
+      state
+        { assumptions = r : assumptions state,
           tactics = OrElim (Or p q) (Imp p_ r) (Imp q_ r_) : tactics state
         }
   | otherwise =
@@ -96,9 +90,8 @@ proveOrElim _ _ _ _ =
 proveImpIntro :: Prop -> ProofState -> ProofState
 proveImpIntro (Imp p q) state
   | isInAssumptions p state && isInAssumptions q state =
-      ProofState
-        { goal = goal state,
-          assumptions = Imp p q : assumptions state,
+      state
+        { assumptions = Imp p q : assumptions state,
           tactics = ImpIntro (Imp p q) : tactics state
         }
   | otherwise =
@@ -109,9 +102,8 @@ proveImpIntro _ _ =
 proveImpElim :: Prop -> Prop -> ProofState -> ProofState
 proveImpElim p (Imp p_ q) state
   | isInAssumptions p state && isInAssumptions (Imp p_ q) state && p == p_ =
-      ProofState
-        { goal = goal state,
-          assumptions = q : assumptions state,
+      state
+        { assumptions = q : assumptions state,
           tactics = ImpElim p (Imp p_ q) : tactics state
         }
   | otherwise =
@@ -122,9 +114,8 @@ proveImpElim _ _ _ =
 proveDn :: Prop -> ProofState -> ProofState
 proveDn (Not (Not p)) state
   | isInAssumptions (Not (Not p)) state =
-      ProofState
-        { goal = goal state,
-          assumptions = p : assumptions state,
+      state
+        { assumptions = p : assumptions state,
           tactics = Dn (Not (Not p)) : tactics state
         }
   | otherwise =
@@ -135,9 +126,8 @@ proveDn _ _ =
 proveContra :: Prop -> Prop -> ProofState -> ProofState
 proveContra p (Not p_) state
   | isInAssumptions p state && isInAssumptions (Not p_) state && p == p_ =
-      ProofState
-        { goal = goal state,
-          assumptions = [],
+      state
+        { assumptions = Not p_ : assumptions state,
           tactics = Contra p (Not p_) : tactics state
         }
   | otherwise =
@@ -148,11 +138,7 @@ proveContra _ _ _ =
 proveDone :: ProofState -> ProofState
 proveDone state
   | isInAssumptions (goal state) state =
-      ProofState
-        { goal = goal state,
-          assumptions = assumptions state,
-          tactics = Done : tactics state
-        }
+      state {tactics = Done : tactics state}
   | otherwise =
       error "Proof is not complete, assumptions do not match the goal"
 

@@ -70,12 +70,13 @@ instance Show Tactic where
 data ProofState = ProofState
   { goal :: Prop,
     assumptions :: [Prop],
+    subProofs :: [ProofState],
     tactics :: [Tactic]
   }
   deriving (Eq)
 
 instance Show ProofState where
-  show (ProofState g a t) =
+  show (ProofState g a _ t) =
     unlines $
       [ "    Goal: " ++ show g,
         "    Assumptions: " ++ show a,
