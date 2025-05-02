@@ -5,28 +5,28 @@ data Token
   | TAtom String -- x, y
   | TNot -- !
   | TAnd -- &
-  | TOr
+  | TOr -- \|
   | TImp -- ->
   | TIff -- <->
   | TLParen -- (
   | TRParen -- )
   | TEOF -- end of file
-  | TAssume -- assumption
+  | TAssume -- assume
   | TSuppose -- suppose
-  | TAndIntro -- and introduction
-  | TAndElimLeft -- and elimination left
-  | TAndElimRight -- and elimination right
-  | TOrIntro -- or introduction
-  | TOrElim -- or elimination
-  | TImpIntro -- implication introduction
-  | TImpElim -- implication elimination
-  | TDn -- double negation
-  | TContra -- contradiction
+  | TAndIntro -- andI
+  | TAndElimLeft -- andEL
+  | TAndElimRight -- andER
+  | TOrIntro -- orI
+  | TOrElim -- orE
+  | TImpIntro -- impI
+  | TImpElim -- impE
+  | TDn -- dn
+  | TContra -- contra
   | TDone -- done
   deriving (Eq, Show)
 
 data Prop
-  = Falsum -- ⊥, False
+  = Falsum -- False, Falsum, ⊥
   | Atom String -- x, y
   | Not Prop -- !x
   | And Prop Prop -- x & y
@@ -45,18 +45,18 @@ instance Show Prop where
   show (Iff p1 p2) = "(" ++ show p1 ++ " <-> " ++ show p2 ++ ")"
 
 data Tactic
-  = Assume Prop -- Assumption
-  | Suppose Prop -- Suppose
-  | AndIntro Prop -- And Introduction
-  | AndElimLeft Prop -- And Elimination Left
-  | AndElimRight Prop -- And Elimination Right
-  | OrIntro Prop -- Or Introduction
-  | OrElim Prop Prop Prop -- Or Elimination
-  | ImpIntro Prop -- Implication Introduction
-  | ImpElim Prop Prop -- Implication Elimination
-  | Dn Prop -- Double Negation
-  | Contra Prop Prop -- Contradiction
-  | Done -- Done
+  = Assume Prop -- assume
+  | Suppose Prop -- suppose
+  | AndIntro Prop -- andI
+  | AndElimLeft Prop -- andEL
+  | AndElimRight Prop -- andER
+  | OrIntro Prop -- orI
+  | OrElim Prop Prop Prop -- orE
+  | ImpIntro Prop -- impI
+  | ImpElim Prop Prop -- impE
+  | Dn Prop -- dn
+  | Contra Prop Prop -- contra
+  | Done -- done
   deriving (Eq)
 
 instance Show Tactic where

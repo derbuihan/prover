@@ -36,7 +36,7 @@ proveAssume p state@(ProofState (Imp p_ q) _ _ _)
       state
         { goal = q,
           assumptions = p : assumptions state,
-          tactics = Assume (Imp p q) : tactics state
+          tactics = Assume p : tactics state
         }
   | otherwise =
       error "Assumption must be an implication"
@@ -55,7 +55,7 @@ proveSuppose x state =
    in state
         { assumptions = Not x : assumptions state,
           subProofs = subProof : subProofs state,
-          tactics = Assume x : tactics state
+          tactics = Suppose x : tactics state
         }
 
 proveAndIntro :: Prop -> ProofState -> ProofState

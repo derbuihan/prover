@@ -6,10 +6,10 @@ import Types
 
 spec :: Spec
 spec = do
-  describe "Tokenizer" specTokenize
-  describe "Parser for Prop" specParseProp
-  describe "Parser for Assumptions" specParseAssumptions
-  describe "Parser for Tactic" specParseTactic
+  describe "tokenizer" specTokenize
+  describe "parser for Prop" specParseProp
+  describe "parser for Assumptions" specParseAssumptions
+  describe "parser for Tactic" specParseTactic
 
 specTokenize :: Spec
 specTokenize = do
