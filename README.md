@@ -1,7 +1,7 @@
 # Prover
 
 A simple proof assistant in Haskell.
-This project is designed to implement [natural deduction][^1].
+This project is designed to implement natural deduction[^1].
 
 # Features
 
@@ -10,7 +10,7 @@ This project is designed to implement [natural deduction][^1].
 
 # Tactics
 
-This proof assistant adopts the tactics from the [Suppes–Lemmon notation][^2].
+This proof assistant adopts the tactics from the Suppes–Lemmon notation[^2].
 The tactics are as follows:
 
 | Tactic     | example            | Description                                                                         |
@@ -55,7 +55,7 @@ done
 Proof completed successfully!
 ```
 
-Other examples can be found in the examples directory.
+Other examples can be found in the `examples` directory.
 
 ```bash
 $ bash ./example/run.sh
