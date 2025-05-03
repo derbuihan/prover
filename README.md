@@ -1,137 +1,17 @@
 # Prover
 
 A simple proof assistant in Haskell.
+This project is designed to implement [natural deduction][^1].
 
-# Usage
+# Features
 
-```bash
-$ cabal run
-Welcome to the Prover!
-Enter a goal:
-p|!p
-Enter assumptions (separated by commas):
-
-Goal: (p | !p)
-Assumptions: []
-Tactics: []
-
-Enter a step:
-assume !(p|!p)
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [!(p | !p)]
-  Tactics: []
-
-
-Enter a step:
-assume !p
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [!!p,!(p | !p)]
-  Tactics: [assume !p]
-    Goal: ⊥
-    Assumptions: [!p,!(p | !p)]
-    Tactics: []
-
-
-
-Enter a step:
-orI p|!p
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [!!p,!(p | !p)]
-  Tactics: [assume !p]
-    Goal: ⊥
-    Assumptions: [(p | !p),!p,!(p | !p)]
-    Tactics: [orI (p | !p)]
-
-
-
-Enter a step:
-contra p|!p !(p|!p)
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [!!p,!(p | !p)]
-  Tactics: [assume !p]
-    Goal: ⊥
-    Assumptions: [⊥,(p | !p),!p,!(p | !p)]
-    Tactics: [contra (p | !p) !(p | !p),orI (p | !p)]
-
-
-
-Enter a step:
-done
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [!!p,!(p | !p)]
-  Tactics: [assume !p]
-
-
-
-Enter a step:
-dn !!p
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [p,!!p,!(p | !p)]
-  Tactics: [dn !!p,assume !p]
-
-
-
-Enter a step:
-orI p|!p
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [(p | !p),p,!!p,!(p | !p)]
-  Tactics: [orI (p | !p),dn !!p,assume !p]
-
-
-
-Enter a step:
-contra p|!p !(p|!p)
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-  Goal: ⊥
-  Assumptions: [⊥,(p | !p),p,!!p,!(p | !p)]
-  Tactics: [contra (p | !p) !(p | !p),orI (p | !p),dn !!p,assume !p]
-
-
-
-Enter a step:
-done
-Goal: (p | !p)
-Assumptions: [!!(p | !p)]
-Tactics: [assume !(p | !p)]
-
-
-Enter a step:
-dn !!(p|!p)
-Goal: (p | !p)
-Assumptions: [(p | !p),!!(p | !p)]
-Tactics: [dn !!(p | !p),assume !(p | !p)]
-
-
-Enter a step:
-done
-
-Proof completed successfully!
-```
+- [x] propositional logic
+- [ ] first-order predicate logic
 
 # Tactics
+
+This proof assistant adopts the tactics from the [Suppes–Lemmon notation][^2].
+The tactics are as follows:
 
 | Tactic     | example            | Description                                                                         |
 | ---------- | ------------------ | ----------------------------------------------------------------------------------- |
@@ -147,3 +27,39 @@ Proof completed successfully!
 | dn         | dn p               | add p to assumptions (where ¬¬p is in the assumptions)                              |
 | contra     | contra p !p        | when goal is contradiction, complete the proof (where p, !p are in the assumptions) |
 | done       | done               | complete the proof                                                                  |
+
+# Usage
+
+The following command will run the Prover:
+
+```bash
+$ cabal run
+Welcome to the Prover!
+Enter a goal:
+p->p
+Enter assumptions (separated by commas):
+
+Goal: (p -> p)
+Assumptions: []
+Tactics: []
+
+Enter a step:
+assume p
+Goal: p
+Assumptions: [p]
+Tactics: [assume p]
+
+Enter a step:
+done
+
+Proof completed successfully!
+```
+
+Other examples can be found in the examples directory.
+
+```bash
+$ bash ./example/run.sh
+```
+
+[^1]: https://en.wikipedia.org/wiki/Natural_deduction
+[^2]: https://en.wikipedia.org/wiki/Suppes%E2%80%93Lemmon_notation
