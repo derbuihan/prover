@@ -1,6 +1,6 @@
-module ProofSpec where
+module ProveSpec where
 
-import Proof
+import Prove
 import Test.Hspec
 import Types
 

@@ -1,4 +1,4 @@
-module Proof where
+module Prove where
 
 import Types
 

@@ -1,7 +1,7 @@
 module Main where
 
 import Parser
-import Proof
+import Prove
 import Types
 
 main :: IO ()
