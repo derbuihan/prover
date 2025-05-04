@@ -28,17 +28,18 @@ convertKeywords keyword =
     "Falsum" -> TFalsum
     "⊥" -> TFalsum
     "assume" -> TAssume
-    "suppose" -> TSuppose
     "andI" -> TAndIntro
     "andEL" -> TAndElimLeft
     "andER" -> TAndElimRight
-    "orI" -> TOrIntro
+    "orIL" -> TOrIntroLeft
+    "orIR" -> TOrIntroRight
     "orE" -> TOrElim
     "impI" -> TImpIntro
     "cp" -> TImpIntro
     "impE" -> TImpElim
     "mpp" -> TImpElim
-    "dn" -> TDn
+    "dnI" -> TDnIntro
+    "dnE" -> TDnElim
     "contra" -> TContra
     "done" -> TDone
     _ -> TAtom keyword
@@ -137,36 +138,32 @@ parseTactic_ :: Parser Tactic
 parseTactic_ (TAssume : tokens) =
   let (prop, rest) = parseProp_ tokens
    in (Assume prop, rest)
-parseTactic_ (TSuppose : tokens) =
-  let (prop, rest) = parseProp_ tokens
-   in (Suppose prop, rest)
 parseTactic_ (TAndIntro : tokens) =
-  let (p, rest) = parseProp_ tokens
-   in (AndIntro p, rest)
+  (AndIntro, tokens)
 parseTactic_ (TAndElimLeft : tokens) =
   let (p, rest) = parseProp_ tokens
    in (AndElimLeft p, rest)
 parseTactic_ (TAndElimRight : tokens) =
   let (p, rest) = parseProp_ tokens
    in (AndElimRight p, rest)
-parseTactic_ (TOrIntro : tokens) =
-  let (p, rest) = parseProp_ tokens
-   in (OrIntro p, rest)
+parseTactic_ (TOrIntroLeft : tokens) =
+  (OrIntroLeft, tokens)
+parseTactic_ (TOrIntroRight : tokens) =
+  (OrIntroRight, tokens)
 parseTactic_ (TOrElim : tokens) =
   let (p, rest) = parseProp_ tokens
-      (q, rest_) = parseProp_ rest
-      (r, rest__) = parseProp_ rest_
-   in (OrElim p q r, rest__)
+   in (OrElim p, rest)
 parseTactic_ (TImpIntro : tokens) =
-  let (p, rest) = parseProp_ tokens
-   in (ImpIntro p, rest)
+  (ImpIntro, tokens)
 parseTactic_ (TImpElim : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest
    in (ImpElim p q, rest_)
-parseTactic_ (TDn : tokens) =
+parseTactic_ (TDnIntro : tokens) =
+  (DnIntro, tokens)
+parseTactic_ (TDnElim : tokens) =
   let (p, rest) = parseProp_ tokens
-   in (Dn p, rest)
+   in (DnElim p, rest)
 parseTactic_ (TContra : tokens) =
   let (p, rest) = parseProp_ tokens
       (q, rest_) = parseProp_ rest

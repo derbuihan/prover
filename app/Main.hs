@@ -30,7 +30,7 @@ loop state = do
   putStrLn "Enter a step: "
   stepInput <- getLine
   let tactic = parseTactic stepInput
-      newState = update tactic state
+      newState = prove tactic state
   if isProved newState
     then do
       print newState

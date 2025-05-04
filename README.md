@@ -13,20 +13,23 @@ This project is designed to implement natural deduction[^1].
 This proof assistant adopts the tactics from the Suppes–Lemmon notation[^2].
 The tactics are as follows:
 
-| Tactic     | example            | Description                                                                         |
-| ---------- | ------------------ | ----------------------------------------------------------------------------------- |
-| assume     | assume x           | add x to assumptions (where x is the antecedent of the goal)                        |
-| suppose    | suppose x          | assume x for RAA (where x is any proposition)                                       |
-| andI       | andI p & q         | add p & q to assumptions (where p, q are in the assumptions)                        |
-| andEL      | andEL p & q        | add p to assumptions (where p & q is in the assumptions)                            |
-| andER      | andER p & q        | add q to assumptions (where p & q is in the assumptions)                            |
-| orI        | orI p\|q           | and p \| q to assumptions (where p or q is in the assumptions)                      |
-| orE        | orE p\|q p->r q->r | add r to assumptions (where p \| q, p -> r, q -> r are in the assumptions)          |
-| impI (cp)  | impI p->q          | add p -> q to assumptions (where p, q are in the assumptions)                       |
-| impE (mpp) | impE p p->q        | add q to assumptions (where p, p -> q are in the assumptions)                       |
-| dn         | dn p               | add p to assumptions (where ¬¬p is in the assumptions)                              |
-| contra     | contra p !p        | when goal is contradiction, complete the proof (where p, !p are in the assumptions) |
-| done       | done               | complete the proof                                                                  |
+| Tactic     | example     | Description                                                                         |
+| ---------- | ----------- | ----------------------------------------------------------------------------------- |
+| assume     | assume x    | assume x for RAA (where x is any proposition)                                       |
+| andI       | andI        | split the goal p & q into two subgoals p and q (where p & q is the goal)            |
+| andEL      | andEL p & q | add p to assumptions (where p & q is in the assumptions)                            |
+| andER      | andER p & q | add q to assumptions (where p & q is in the assumptions)                            |
+| orIL       | orIL        | choose p as the left disjunct (where p \| q is the goal)                            |
+| orIR       | orIR        | choose q as the right disjunct (where p \| q is the goal)                           |
+| orE        | orE p\|q    | split into cases: assuming p and assuming q (where p \| q is in the assumptions)    |
+| impI (cp)  | impI        | add p to assumptions and change the goal to q (where p -> q is the goal)            |
+| impE (mpp) | impE p p->q | add q to assumptions (where p, p -> q are in the assumptions)                       |
+| dnI        | dnI         | change the goal to p (where !!p is the goal)                                        |
+| dnE        | dnE p       | add p to assumptions (where ¬¬p is in the assumptions)                              |
+| contra     | contra p !p | when goal is contradiction, complete the proof (where p, !p are in the assumptions) |
+| done       | done        | complete the proof when the goal is already in the assumptions                      |
+
+assume, andI, andEL, andER, orIL, orIR, orE, impI, impE, dnI, dnE, contra, done
 
 # Usage
 

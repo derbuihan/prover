@@ -12,15 +12,16 @@ data Token
   | TRParen -- )
   | TEOF -- end of file
   | TAssume -- assume
-  | TSuppose -- suppose
   | TAndIntro -- andI
   | TAndElimLeft -- andEL
   | TAndElimRight -- andER
-  | TOrIntro -- orI
+  | TOrIntroLeft -- orIL
+  | TOrIntroRight -- orIR
   | TOrElim -- orE
   | TImpIntro -- impI
   | TImpElim -- impE
-  | TDn -- dn
+  | TDnIntro -- dnI
+  | TDnElim -- dnE
   | TContra -- contra
   | TDone -- done
   deriving (Eq, Show)
@@ -46,30 +47,32 @@ instance Show Prop where
 
 data Tactic
   = Assume Prop -- assume
-  | Suppose Prop -- suppose
-  | AndIntro Prop -- andI
+  | AndIntro -- andI
   | AndElimLeft Prop -- andEL
   | AndElimRight Prop -- andER
-  | OrIntro Prop -- orI
-  | OrElim Prop Prop Prop -- orE
-  | ImpIntro Prop -- impI
+  | OrIntroLeft -- orIL
+  | OrIntroRight -- orIR
+  | OrElim Prop -- orE
+  | ImpIntro -- impI
   | ImpElim Prop Prop -- impE
-  | Dn Prop -- dn
+  | DnIntro -- dnI
+  | DnElim Prop -- dnE
   | Contra Prop Prop -- contra
   | Done -- done
   deriving (Eq)
 
 instance Show Tactic where
   show (Assume p) = "assume " ++ show p
-  show (Suppose p) = "suppose " ++ show p
-  show (AndIntro p1) = "andI " ++ show p1
+  show AndIntro = "andI"
   show (AndElimLeft p) = "andEL " ++ show p
   show (AndElimRight p) = "andER " ++ show p
-  show (OrIntro p) = "orI " ++ show p
-  show (OrElim p1 p2 p3) = "orE " ++ show p1 ++ " " ++ show p2 ++ " " ++ show p3
-  show (ImpIntro p1) = "impI " ++ show p1
+  show OrIntroLeft = "orIL"
+  show OrIntroRight = "orIR"
+  show (OrElim p) = "orE " ++ show p
+  show ImpIntro = "impI"
   show (ImpElim p1 p2) = "impE " ++ show p1 ++ " " ++ show p2
-  show (Dn p) = "dn " ++ show p
+  show DnIntro = "dnI"
+  show (DnElim p) = "dnE " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
 

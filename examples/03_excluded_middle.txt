@@ -1,7 +1,7 @@
 p|!p
 
-suppose !(p|!p)
-suppose !p
+assume !(p|!p)
+assume !p
 orI p|!p
 contra p|!p !(p|!p)
 done
