@@ -32,7 +32,7 @@ loop state = do
   stepInput <- getLine
   let tactic = parseTactic stepInput
       newState = prove tactic state
-  if isProved newState
+  if completed newState
     then do
       print newState
       putStrLn "Proof completed successfully!"

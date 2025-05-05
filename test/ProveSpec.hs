@@ -296,29 +296,3 @@ specHelpers = do
         actual = isInAssumptions (Atom "x") input
         expected = True
     actual `shouldBe` expected
-
-  it "isProved" $ do
-    let input =
-          ProofState
-            { goal = Atom "x",
-              assumptions = [Atom "x"],
-              subProofs = [],
-              tactics = [],
-              completed = True
-            }
-        actual = isProved input
-        expected = False
-    actual `shouldBe` expected
-
-  it "isProved with Done" $ do
-    let input =
-          ProofState
-            { goal = Atom "x",
-              assumptions = [Atom "x"],
-              subProofs = [],
-              tactics = [Done],
-              completed = True
-            }
-        actual = isProved input
-        expected = True
-    actual `shouldBe` expected

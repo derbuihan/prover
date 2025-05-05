@@ -63,12 +63,12 @@ data Tactic
 instance Show Tactic where
   show (Assume p q) = "assume " ++ show p ++ " for " ++ show q
   show (Suppose p) = "suppose " ++ show p
-  show (AndIntro p) = "andI" ++ show p
+  show (AndIntro p) = "andI " ++ show p
   show (AndElimLeft p) = "andEL " ++ show p
   show (AndElimRight p) = "andER " ++ show p
-  show (OrIntro p) = "orI" ++ show p
+  show (OrIntro p) = "orI " ++ show p
   show (OrElim p q) = "orE " ++ show p ++ " for " ++ show q
-  show (ImpIntro p) = "impI" ++ show p
+  show (ImpIntro p) = "impI " ++ show p
   show (ImpElim p1 p2) = "impE " ++ show p1 ++ " " ++ show p2
   show (Dn p) = "dn " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
@@ -85,7 +85,7 @@ data ProofState = ProofState
 
 printProofState :: Int -> ProofState -> String
 printProofState _ (ProofState _ _ _ _ True) = ""
-printProofState level (ProofState g a s t c) =
+printProofState level (ProofState g a s t _) =
   unlines $
     [ indent ++ "Goal: " ++ show g,
       indent ++ "Assumptions: " ++ show a,

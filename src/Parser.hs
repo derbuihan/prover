@@ -109,7 +109,7 @@ parseAtom (TLParen : tokens) =
    in case rest of
         (TRParen : rest') -> (prop, rest')
         _ -> error "Expected closing parenthesis"
-parseAtom _ = error "Expected atom or parent"
+parseAtom _ = error "Expected atom or parenthesis"
 
 -- Parser for Assumptions
 

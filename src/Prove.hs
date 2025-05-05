@@ -4,13 +4,13 @@ import Types
 
 prove :: Tactic -> ProofState -> ProofState
 prove tactic state
-  | all isProved (subProofs state) = update tactic state
+  | all completed (subProofs state) = update tactic state
   | otherwise = state {subProofs = prove_ tactic (subProofs state)}
 
 prove_ :: Tactic -> [ProofState] -> [ProofState]
 prove_ _ [] = []
 prove_ tactic (x : xs)
-  | not (isProved x) = prove tactic x : xs
+  | not (completed x) = prove tactic x : xs
   | otherwise = x : prove_ tactic xs
 
 update :: Tactic -> ProofState -> ProofState
@@ -195,10 +195,3 @@ doneRule state
 isInAssumptions :: Prop -> ProofState -> Bool
 isInAssumptions prop state =
   prop `elem` assumptions state
-
-isProved :: ProofState -> Bool
-isProved state =
-  case tactics state of
-    [] -> False
-    (Done : _) -> True
-    _ -> False
