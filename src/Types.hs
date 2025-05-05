@@ -33,7 +33,11 @@ data Token
 data Term
   = Var String -- x, y
   | Func String [Term] -- f(x, y), g(x)
-  deriving (Eq, Show)
+  deriving (Eq)
+
+instance Show Term where
+  show (Var s) = s
+  show (Func s ts) = s ++ "(" ++ concatMap show ts ++ ")"
 
 data Prop
   = Falsum -- False, Falsum, ⊥

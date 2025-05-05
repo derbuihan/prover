@@ -1,7 +1,6 @@
 module Parser where
 
 import Data.Char
-import GHC.Conc (par)
 import Types
 
 -- Tokenizer
@@ -62,7 +61,19 @@ parseProp s =
         _ -> error "Parsing failed, unexpected tokens remaining"
 
 parseProp_ :: Parser Prop
-parseProp_ = parseIff
+parseProp_ = parseForall
+
+parseForall :: Parser Prop
+parseForall (TForall : TStr s : TDot : tokens) =
+  let (prop, rest) = parseIff tokens
+   in (Forall s prop, rest)
+parseForall tokens = parseExists tokens
+
+parseExists :: Parser Prop
+parseExists (TExists : TStr s : TDot : tokens) =
+  let (prop, rest) = parseIff tokens
+   in (Exists s prop, rest)
+parseExists tokens = parseIff tokens
 
 parseIff :: Parser Prop
 parseIff tokens =
@@ -119,8 +130,38 @@ parseFalsum (TFalsum : tokens) = (Falsum, tokens)
 parseFalsum tokens = parseAtom tokens
 
 parseAtom :: Parser Prop
+parseAtom (TStr s : TLParen : tokens) =
+  let (terms, rest) = parseArgs tokens
+   in (Atom s terms, rest)
 parseAtom (TStr s : tokens) = (Atom s [], tokens)
 parseAtom _ = error "Expected atom"
+
+-- Parser for Terms
+
+parseTerm :: String -> Term
+parseTerm s =
+  let tokens = tokenize s
+      (parsed, rest) = parseTerm_ tokens
+   in case rest of
+        [TEOF] -> parsed
+        _ -> error "Parsing failed, unexpected tokens remaining"
+
+parseTerm_ :: Parser Term
+parseTerm_ (TStr s : TLParen : tokens) =
+  let (terms, rest) = parseArgs tokens
+   in (Func s terms, rest)
+parseTerm_ (TStr s : tokens) = (Var s, tokens)
+parseTerm_ _ = error "Expected term"
+
+parseArgs :: Parser [Term]
+parseArgs tokens =
+  let (term, rest) = parseTerm_ tokens
+   in case rest of
+        (TComma : rest') ->
+          let (terms, rest'') = parseArgs rest'
+           in (term : terms, rest'')
+        (TRParen : rest') -> ([term], rest')
+        _ -> error "Expected comma or closing parenthesis"
 
 -- Parser for Assumptions
 

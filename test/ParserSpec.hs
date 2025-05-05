@@ -7,7 +7,9 @@ import Types
 spec :: Spec
 spec = do
   describe "tokenizer" specTokenize
-  describe "parser for Prop" specParseProp
+  describe "parser for Propositional Logic" specParsePropLogic
+  describe "parser for Predicate Logic" specParsePredLogic
+  describe "parser for Term" specParseTerm
   describe "parser for Assumptions" specParseAssumptions
   describe "parser for Tactic" specParseTactic
 
@@ -25,8 +27,8 @@ specTokenize = do
         expected = [TAssume, TStr "x1", TEOF]
     actual `shouldBe` expected
 
-specParseProp :: Spec
-specParseProp = do
+specParsePropLogic :: Spec
+specParsePropLogic = do
   it "falsum" $ do
     let input = "False"
         actual = parseProp input
@@ -85,6 +87,52 @@ specParseProp = do
     let input = "!(x & y) <-> !x | !y"
         actual = parseProp input
         expected = Iff (Not (And (Atom "x" []) (Atom "y" []))) (Or (Not (Atom "x" [])) (Not (Atom "y" [])))
+    actual `shouldBe` expected
+
+specParsePredLogic :: Spec
+specParsePredLogic = do
+  it "forall" $ do
+    let input = "forall x. P(x)"
+        actual = parseProp input
+        expected = Forall "x" (Atom "P" [Var "x"])
+    actual `shouldBe` expected
+
+  it "forall complex" $ do
+    let input = "forall x. P(x, f(y, z)) & Q(w)"
+        actual = parseProp input
+        expected = Forall "x" (And (Atom "P" [Var "x", Func "f" [Var "y", Var "z"]]) (Atom "Q" [Var "w"]))
+    actual `shouldBe` expected
+
+  it "exists" $ do
+    let input = "exists x. Q(x)"
+        actual = parseProp input
+        expected = Exists "x" (Atom "Q" [Var "x"])
+    actual `shouldBe` expected
+
+  it "exists complex" $ do
+    let input = "exists x. P(x) | Q(f(y, z), w)"
+        actual = parseProp input
+        expected = Exists "x" (Or (Atom "P" [Var "x"]) (Atom "Q" [Func "f" [Var "y", Var "z"], Var "w"]))
+    actual `shouldBe` expected
+
+specParseTerm :: Spec
+specParseTerm = do
+  it "variable" $ do
+    let input = "x"
+        actual = parseTerm input
+        expected = Var "x"
+    actual `shouldBe` expected
+
+  it "function" $ do
+    let input = "f(x, y)"
+        actual = parseTerm input
+        expected = Func "f" [Var "x", Var "y"]
+    actual `shouldBe` expected
+
+  it "nested function" $ do
+    let input = "f(g(x), h(x, y), z)"
+        actual = parseTerm input
+        expected = Func "f" [Func "g" [Var "x"], Func "h" [Var "x", Var "y"], Var "z"]
     actual `shouldBe` expected
 
 specParseAssumptions :: Spec

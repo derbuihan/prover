@@ -8,13 +8,11 @@ run_test() {
     output=$(cat "$test_file" | cabal run 2>&1)
     if echo "$output" | grep -q "Proof completed successfully!"; then
         echo "✓ Proof verified successfully!"
-        echo ""
     else
         echo "✗ Proof verification failed!"
         echo "------- Output -------"
         echo "$output"
         echo "---------------------"
-        echo "" 
         exit 1
     fi
 }
