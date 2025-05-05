@@ -21,7 +21,8 @@ initState parsedGoal parsedAssum =
     { goal = parsedGoal,
       assumptions = parsedAssum,
       subProofs = [],
-      tactics = []
+      tactics = [],
+      completed = False
     }
 
 loop :: ProofState -> IO ()

@@ -1,0 +1,8 @@
+p->!!p
+
+assume p for !!p
+suppose !p
+contra p !p
+done
+done
+done

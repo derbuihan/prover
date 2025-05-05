@@ -1,6 +1,6 @@
 !p
 p->q, !q
-assume p
+suppose p
 impE p p->q
 contra q !q
 done

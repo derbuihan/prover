@@ -1,8 +1,6 @@
 (p->p) & (p->p)
 
-andI
-impI
+assume p for p
 done
-impI
-done
+andI (p->p) & (p->p)
 done

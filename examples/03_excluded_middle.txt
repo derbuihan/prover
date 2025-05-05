@@ -1,13 +1,13 @@
 p|!p
 
-assume !(p|!p)
-assume !p
+suppose !(p|!p)
+suppose !p
 orI p|!p
 contra p|!p !(p|!p)
 done
-dn !!p
+dn p
 orI p|!p
 contra p|!p !(p|!p)
 done
-dn !!(p|!p)
+dn p|!p
 done

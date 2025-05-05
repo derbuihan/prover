@@ -11,31 +11,42 @@ spec = do
 
 specProve :: Spec
 specProve = do
-  it "assume" $ do
+  it "assume p for q" $ do
     let input =
           ProofState
             { goal = Imp (Atom "x") (Atom "y"),
               assumptions = [],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
-        actual = prove (Assume (Atom "x")) input
+        actual = prove (Assume (Atom "x") (Atom "y")) input
         expected =
           ProofState
-            { goal = Atom "y",
-              assumptions = [Atom "x"],
-              subProofs = [],
-              tactics = [Assume (Atom "x")]
+            { goal = Imp (Atom "x") (Atom "y"),
+              assumptions = [Imp (Atom "x") (Atom "y")],
+              subProofs =
+                [ ProofState
+                    { goal = Atom "y",
+                      assumptions = [Atom "x"],
+                      subProofs = [],
+                      tactics = [],
+                      completed = False
+                    }
+                ],
+              tactics = [Assume (Atom "x") (Atom "y")],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "suppose" $ do
+  it "suppose p" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (Suppose (Atom "x")) input
         expected =
@@ -47,20 +58,23 @@ specProve = do
                     { goal = Falsum,
                       assumptions = [Atom "x"],
                       subProofs = [],
-                      tactics = []
+                      tactics = [],
+                      completed = False
                     }
                 ],
-              tactics = [Suppose (Atom "x")]
+              tactics = [Suppose (Atom "x")],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "andI" $ do
+  it "andI p&q" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [Atom "x", Atom "y"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (AndIntro (And (Atom "x") (Atom "y"))) input
         expected =
@@ -68,17 +82,19 @@ specProve = do
             { goal = Atom "x",
               assumptions = [And (Atom "x") (Atom "y"), Atom "x", Atom "y"],
               subProofs = [],
-              tactics = [AndIntro (And (Atom "x") (Atom "y"))]
+              tactics = [AndIntro (And (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "andEL" $ do
+  it "andEL p&q" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [And (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (AndElimLeft (And (Atom "x") (Atom "y"))) input
         expected =
@@ -86,17 +102,19 @@ specProve = do
             { goal = Atom "x",
               assumptions = [Atom "x", And (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = [AndElimLeft (And (Atom "x") (Atom "y"))]
+              tactics = [AndElimLeft (And (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "andER" $ do
+  it "andER p&q" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [And (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (AndElimRight (And (Atom "x") (Atom "y"))) input
         expected =
@@ -104,17 +122,19 @@ specProve = do
             { goal = Atom "x",
               assumptions = [Atom "y", And (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = [AndElimRight (And (Atom "x") (Atom "y"))]
+              tactics = [AndElimRight (And (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "orI" $ do
+  it "orI p|q" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [Atom "x"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (OrIntro (Or (Atom "x") (Atom "y"))) input
         expected =
@@ -122,35 +142,54 @@ specProve = do
             { goal = Atom "x",
               assumptions = [Or (Atom "x") (Atom "y"), Atom "x"],
               subProofs = [],
-              tactics = [OrIntro (Or (Atom "x") (Atom "y"))]
+              tactics = [OrIntro (Or (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "orE" $ do
+  it "orE p|q for r" $ do
     let input =
           ProofState
-            { goal = Atom "x",
-              assumptions = [Or (Atom "x") (Atom "y"), Imp (Atom "x") (Atom "z"), Imp (Atom "y") (Atom "z")],
+            { goal = Atom "z",
+              assumptions = [Or (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
-        actual = prove (OrElim (Or (Atom "x") (Atom "y")) (Imp (Atom "x") (Atom "z")) (Imp (Atom "y") (Atom "z"))) input
+        actual = prove (OrElim (Or (Atom "x") (Atom "y")) (Atom "z")) input
         expected =
           ProofState
-            { goal = Atom "x",
-              assumptions = [Atom "z", Or (Atom "x") (Atom "y"), Imp (Atom "x") (Atom "z"), Imp (Atom "y") (Atom "z")],
-              subProofs = [],
-              tactics = [OrElim (Or (Atom "x") (Atom "y")) (Imp (Atom "x") (Atom "z")) (Imp (Atom "y") (Atom "z"))]
+            { goal = Atom "z",
+              assumptions = [Atom "z", Or (Atom "x") (Atom "y")],
+              subProofs =
+                [ ProofState
+                    { goal = Atom "z",
+                      assumptions = [Atom "x", Or (Atom "x") (Atom "y")],
+                      subProofs = [],
+                      tactics = [],
+                      completed = False
+                    },
+                  ProofState
+                    { goal = Atom "z",
+                      assumptions = [Atom "y", Or (Atom "x") (Atom "y")],
+                      subProofs = [],
+                      tactics = [],
+                      completed = False
+                    }
+                ],
+              tactics = [OrElim (Or (Atom "x") (Atom "y")) (Atom "z")],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "impI (cp)" $ do
+  it "impI p->q" $ do
     let input =
           ProofState
             { goal = Atom "z",
               assumptions = [Atom "x", Atom "y"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (ImpIntro (Imp (Atom "x") (Atom "y"))) input
         expected =
@@ -158,17 +197,19 @@ specProve = do
             { goal = Atom "z",
               assumptions = [Imp (Atom "x") (Atom "y"), Atom "x", Atom "y"],
               subProofs = [],
-              tactics = [ImpIntro (Imp (Atom "x") (Atom "y"))]
+              tactics = [ImpIntro (Imp (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "impE (mpp)" $ do
+  it "impE p p->q" $ do
     let input =
           ProofState
             { goal = Atom "y",
               assumptions = [Atom "x", Imp (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (ImpElim (Atom "x") (Imp (Atom "x") (Atom "y"))) input
         expected =
@@ -176,35 +217,39 @@ specProve = do
             { goal = Atom "y",
               assumptions = [Atom "y", Atom "x", Imp (Atom "x") (Atom "y")],
               subProofs = [],
-              tactics = [ImpElim (Atom "x") (Imp (Atom "x") (Atom "y"))]
+              tactics = [ImpElim (Atom "x") (Imp (Atom "x") (Atom "y"))],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "dn" $ do
+  it "dn p" $ do
     let input =
           ProofState
             { goal = Atom "x",
               assumptions = [Not (Not (Atom "x"))],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
-        actual = prove (Dn (Not (Not (Atom "x")))) input
+        actual = prove (Dn (Atom "x")) input
         expected =
           ProofState
             { goal = Atom "x",
               assumptions = [Atom "x", Not (Not (Atom "x"))],
               subProofs = [],
-              tactics = [Dn (Not (Not (Atom "x")))]
+              tactics = [Dn (Atom "x")],
+              completed = False
             }
     actual `shouldBe` expected
 
-  it "contra" $ do
+  it "contra p !p" $ do
     let input =
           ProofState
             { goal = Falsum,
               assumptions = [Atom "x", Not (Atom "x")],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove (Contra (Atom "x") (Not (Atom "x"))) input
         expected =
@@ -212,7 +257,8 @@ specProve = do
             { goal = Falsum,
               assumptions = [Falsum, Atom "x", Not (Atom "x")],
               subProofs = [],
-              tactics = [Contra (Atom "x") (Not (Atom "x"))]
+              tactics = [Contra (Atom "x") (Not (Atom "x"))],
+              completed = False
             }
     actual `shouldBe` expected
 
@@ -222,7 +268,8 @@ specProve = do
             { goal = Atom "x",
               assumptions = [Atom "x"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = False
             }
         actual = prove Done input
         expected =
@@ -230,7 +277,8 @@ specProve = do
             { goal = Atom "x",
               assumptions = [Atom "x"],
               subProofs = [],
-              tactics = [Done]
+              tactics = [Done],
+              completed = True
             }
     actual `shouldBe` expected
 
@@ -242,7 +290,8 @@ specHelpers = do
             { goal = Atom "x",
               assumptions = [Atom "x", Atom "y"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = True
             }
         actual = isInAssumptions (Atom "x") input
         expected = True
@@ -254,7 +303,8 @@ specHelpers = do
             { goal = Atom "x",
               assumptions = [Atom "x"],
               subProofs = [],
-              tactics = []
+              tactics = [],
+              completed = True
             }
         actual = isProved input
         expected = False
@@ -266,7 +316,8 @@ specHelpers = do
             { goal = Atom "x",
               assumptions = [Atom "x"],
               subProofs = [],
-              tactics = [Done]
+              tactics = [Done],
+              completed = True
             }
         actual = isProved input
         expected = True

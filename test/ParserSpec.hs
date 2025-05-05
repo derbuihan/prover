@@ -110,9 +110,9 @@ specParseAssumptions = do
 specParseTactic :: Spec
 specParseTactic = do
   it "assume" $ do
-    let input = "assume x1"
+    let input = "assume x1 for x2"
         actual = parseTactic input
-        expected = Assume (Atom "x1")
+        expected = Assume (Atom "x1") (Atom "x2")
     actual `shouldBe` expected
 
   it "done" $ do

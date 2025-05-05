@@ -16,22 +16,36 @@ prove_ tactic (x : xs)
 update :: Tactic -> ProofState -> ProofState
 update tactic state =
   case tactic of
-    Assume p -> assumeRule p state
-    AndIntro -> andIntroRule state
+    Assume p q -> assumeRule p q state
+    Suppose p -> supposeRule p state
+    AndIntro pq -> andIntroRule pq state
     AndElimLeft pq -> andElimLeftRule pq state
     AndElimRight pq -> andElimRightRule pq state
-    OrIntroLeft -> orIntroLeftRule state
-    OrIntroRight -> orIntroRightRule state
-    OrElim pq -> orElimRule pq state
-    ImpIntro -> impIntroRule state
+    OrIntro pq -> orIntroRule pq state
+    OrElim pq r -> orElimRule pq r state
+    ImpIntro pq -> impIntroRule pq state
     ImpElim p pq -> impElimRule p pq state
-    DnIntro -> dnIntroRule state
-    DnElim p -> dnElimRule p state
+    Dn p -> dnRule p state
     Contra p np -> contraRule p np state
     Done -> doneRule state
 
-assumeRule :: Prop -> ProofState -> ProofState
-assumeRule p state =
+assumeRule :: Prop -> Prop -> ProofState -> ProofState
+assumeRule p q state =
+  let subProof =
+        state
+          { goal = q,
+            assumptions = p : assumptions state,
+            subProofs = [],
+            tactics = []
+          }
+   in state
+        { assumptions = Imp p q : assumptions state,
+          subProofs = subProof : subProofs state,
+          tactics = Assume p q : tactics state
+        }
+
+supposeRule :: Prop -> ProofState -> ProofState
+supposeRule p state =
   let subProof =
         state
           { goal = Falsum,
@@ -42,31 +56,19 @@ assumeRule p state =
    in state
         { assumptions = Not p : assumptions state,
           subProofs = subProof : subProofs state,
-          tactics = Assume p : tactics state
+          tactics = Suppose p : tactics state
         }
 
-andIntroRule :: ProofState -> ProofState
-andIntroRule state@(ProofState (And p q) _ _ _) =
-  let subProofLeft =
-        state
-          { goal = p,
-            assumptions = assumptions state,
-            subProofs = [],
-            tactics = []
-          }
-      subProofRight =
-        state
-          { goal = q,
-            assumptions = assumptions state,
-            subProofs = [],
-            tactics = []
-          }
-   in state
+andIntroRule :: Prop -> ProofState -> ProofState
+andIntroRule (And p q) state
+  | isInAssumptions p state && isInAssumptions q state =
+      state
         { assumptions = And p q : assumptions state,
-          subProofs = [subProofLeft, subProofRight],
-          tactics = AndIntro : tactics state
+          tactics = AndIntro (And p q) : tactics state
         }
-andIntroRule _ =
+  | otherwise =
+      error "And Introduction is not valid in the current context"
+andIntroRule _ _ =
   error "And Introduction must be applied to a conjunction"
 
 andElimLeftRule :: Prop -> ProofState -> ProofState
@@ -93,61 +95,55 @@ andElimRightRule (And p q) state
 andElimRightRule _ _ =
   error "And Elimination Right must be applied to a conjunction"
 
-orIntroLeftRule :: ProofState -> ProofState
-orIntroLeftRule state@(ProofState (Or p q) _ _ _) =
-  state
-    { goal = p,
-      assumptions = Or p q : assumptions state,
-      tactics = OrIntroLeft : tactics state
-    }
-orIntroLeftRule _ =
-  error "Or Introduction Left must be applied to a disjunction"
+orIntroRule :: Prop -> ProofState -> ProofState
+orIntroRule (Or p q) state
+  | isInAssumptions p state || isInAssumptions q state =
+      state
+        { assumptions = Or p q : assumptions state,
+          tactics = OrIntro (Or p q) : tactics state
+        }
+  | otherwise =
+      error "Or Introduction is not valid in the current context"
+orIntroRule _ _ =
+  error "Or Introduction must be applied to a disjunction"
 
-orIntroRightRule :: ProofState -> ProofState
-orIntroRightRule state@(ProofState (Or p q) _ _ _) =
-  state
-    { goal = q,
-      assumptions = Or p q : assumptions state,
-      tactics = OrIntroRight : tactics state
-    }
-orIntroRightRule _ =
-  error "Or Introduction Right must be applied to a disjunction"
-
-orElimRule :: Prop -> ProofState -> ProofState
-orElimRule (Or p q) state
+orElimRule :: Prop -> Prop -> ProofState -> ProofState
+orElimRule (Or p q) r state
   | isInAssumptions (Or p q) state =
       let subProofLeft =
             state
-              { goal = p,
-                assumptions = assumptions state,
+              { goal = r,
+                assumptions = p : assumptions state,
                 subProofs = [],
                 tactics = []
               }
           subProofRight =
             state
-              { goal = q,
-                assumptions = assumptions state,
+              { goal = r,
+                assumptions = q : assumptions state,
                 subProofs = [],
                 tactics = []
               }
        in state
-            { assumptions = Or p q : assumptions state,
+            { assumptions = r : assumptions state,
               subProofs = [subProofLeft, subProofRight],
-              tactics = OrElim (Or p q) : tactics state
+              tactics = OrElim (Or p q) r : tactics state
             }
   | otherwise =
       error "Or Elimination is not valid in the current context"
-orElimRule _ _ =
+orElimRule _ _ _ =
   error "Or Elimination must be applied to a disjunction"
 
-impIntroRule :: ProofState -> ProofState
-impIntroRule state@(ProofState (Imp p q) _ _ _) =
-  state
-    { goal = q,
-      assumptions = p : assumptions state,
-      tactics = ImpIntro : tactics state
-    }
-impIntroRule _ =
+impIntroRule :: Prop -> ProofState -> ProofState
+impIntroRule (Imp p q) state
+  | isInAssumptions p state && isInAssumptions q state =
+      state
+        { assumptions = Imp p q : assumptions state,
+          tactics = ImpIntro (Imp p q) : tactics state
+        }
+  | otherwise =
+      error "Implication Introduction is not valid in the current context"
+impIntroRule _ _ =
   error "Implication Introduction must be applied to an implication"
 
 impElimRule :: Prop -> Prop -> ProofState -> ProofState
@@ -162,24 +158,15 @@ impElimRule p (Imp p_ q) state
 impElimRule _ _ _ =
   error "Implication Elimination must be applied to an implication and a proposition"
 
-dnIntroRule :: ProofState -> ProofState
-dnIntroRule state@(ProofState (Not (Not p)) _ _ _) =
-  state
-    { goal = p,
-      tactics = DnIntro : tactics state
-    }
-dnIntroRule _ =
-  error "Double Negation Introduction must be applied to a negation"
-
-dnElimRule :: Prop -> ProofState -> ProofState
-dnElimRule p state
+dnRule :: Prop -> ProofState -> ProofState
+dnRule p state
   | isInAssumptions (Not (Not p)) state =
       state
         { assumptions = p : assumptions state,
-          tactics = DnElim p : tactics state
+          tactics = Dn p : tactics state
         }
   | otherwise =
-      error "Double Negation Elimination is not valid in the current context"
+      error "Double Negation is not valid in the current context"
 
 contraRule :: Prop -> Prop -> ProofState -> ProofState
 contraRule p (Not p_) state
@@ -196,7 +183,10 @@ contraRule _ _ _ =
 doneRule :: ProofState -> ProofState
 doneRule state
   | isInAssumptions (goal state) state =
-      state {tactics = Done : tactics state}
+      state
+        { tactics = Done : tactics state,
+          completed = True
+        }
   | otherwise =
       error "Proof is not complete, assumptions do not match the goal"
 

@@ -12,16 +12,16 @@ data Token
   | TRParen -- )
   | TEOF -- end of file
   | TAssume -- assume
+  | TFor -- for
+  | TSuppose -- suppose
   | TAndIntro -- andI
   | TAndElimLeft -- andEL
   | TAndElimRight -- andER
-  | TOrIntroLeft -- orIL
-  | TOrIntroRight -- orIR
+  | TOrIntro -- orI
   | TOrElim -- orE
   | TImpIntro -- impI
   | TImpElim -- impE
-  | TDnIntro -- dnI
-  | TDnElim -- dnE
+  | TDn -- dn
   | TContra -- contra
   | TDone -- done
   deriving (Eq, Show)
@@ -46,33 +46,31 @@ instance Show Prop where
   show (Iff p1 p2) = "(" ++ show p1 ++ " <-> " ++ show p2 ++ ")"
 
 data Tactic
-  = Assume Prop -- assume
-  | AndIntro -- andI
+  = Assume Prop Prop -- assume p for q
+  | Suppose Prop -- suppose p
+  | AndIntro Prop -- andI
   | AndElimLeft Prop -- andEL
   | AndElimRight Prop -- andER
-  | OrIntroLeft -- orIL
-  | OrIntroRight -- orIR
-  | OrElim Prop -- orE
-  | ImpIntro -- impI
+  | OrIntro Prop -- orI
+  | OrElim Prop Prop -- orE
+  | ImpIntro Prop -- impI
   | ImpElim Prop Prop -- impE
-  | DnIntro -- dnI
-  | DnElim Prop -- dnE
+  | Dn Prop -- dn
   | Contra Prop Prop -- contra
   | Done -- done
   deriving (Eq)
 
 instance Show Tactic where
-  show (Assume p) = "assume " ++ show p
-  show AndIntro = "andI"
+  show (Assume p q) = "assume " ++ show p ++ " for " ++ show q
+  show (Suppose p) = "suppose " ++ show p
+  show (AndIntro p) = "andI" ++ show p
   show (AndElimLeft p) = "andEL " ++ show p
   show (AndElimRight p) = "andER " ++ show p
-  show OrIntroLeft = "orIL"
-  show OrIntroRight = "orIR"
-  show (OrElim p) = "orE " ++ show p
-  show ImpIntro = "impI"
+  show (OrIntro p) = "orI" ++ show p
+  show (OrElim p q) = "orE " ++ show p ++ " for " ++ show q
+  show (ImpIntro p) = "impI" ++ show p
   show (ImpElim p1 p2) = "impE " ++ show p1 ++ " " ++ show p2
-  show DnIntro = "dnI"
-  show (DnElim p) = "dnE " ++ show p
+  show (Dn p) = "dn " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
 
@@ -80,19 +78,22 @@ data ProofState = ProofState
   { goal :: Prop,
     assumptions :: [Prop],
     subProofs :: [ProofState],
-    tactics :: [Tactic]
+    tactics :: [Tactic],
+    completed :: Bool
   }
   deriving (Eq)
 
-printState :: Int -> ProofState -> String
-printState _ (ProofState _ _ _ (Done : _)) = ""
-printState indent (ProofState g a s t) =
+printProofState :: Int -> ProofState -> String
+printProofState _ (ProofState _ _ _ _ True) = ""
+printProofState level (ProofState g a s t c) =
   unlines $
-    [ replicate indent ' ' ++ "Goal: " ++ show g,
-      replicate indent ' ' ++ "Assumptions: " ++ show a,
-      replicate indent ' ' ++ "Tactics: " ++ show t
+    [ indent ++ "Goal: " ++ show g,
+      indent ++ "Assumptions: " ++ show a,
+      indent ++ "Tactics: " ++ show t
     ]
-      ++ map (printState (indent + 2)) s
+      ++ map (printProofState (level + 1)) s
+  where
+    indent = replicate (level * 2) ' '
 
 instance Show ProofState where
-  show = printState 0
+  show = printProofState 0
