@@ -10,6 +10,10 @@ data Token
   | TIff -- <->
   | TLParen -- (
   | TRParen -- )
+  | TForall -- ∀
+  | TExists -- ∃
+  | TComma -- ,
+  | TDot -- .
   | TEOF -- end of file
   | TAssume -- assume
   | TFor -- for

@@ -13,6 +13,7 @@ tokenize ('&' : xs) = TAnd : tokenize xs
 tokenize ('|' : xs) = TOr : tokenize xs
 tokenize ('(' : xs) = TLParen : tokenize xs
 tokenize (')' : xs) = TRParen : tokenize xs
+tokenize (',' : xs) = TComma : tokenize xs
 tokenize ('-' : '>' : xs) = TImp : tokenize xs
 tokenize ('<' : '-' : '>' : xs) = TIff : tokenize xs
 tokenize (x : xs)
@@ -27,6 +28,8 @@ convertKeywords keyword =
     "False" -> TFalsum
     "Falsum" -> TFalsum
     "⊥" -> TFalsum
+    "forall" -> TForall
+    "exists" -> TExists
     "assume" -> TAssume
     "for" -> TFor
     "suppose" -> TSuppose
@@ -114,15 +117,25 @@ parseAtom _ = error "Expected atom or parenthesis"
 -- Parser for Assumptions
 
 parseAssumptions :: String -> [Prop]
-parseAssumptions s = map parseProp (splitOn ',' s)
+parseAssumptions "" = []
+parseAssumptions s =
+  let tokens = tokenize s
+      (parsed, rest) = parseAssumptions_ tokens
+   in case rest of
+        [TEOF] -> parsed
+        _ -> error "Parsing failed, unexpected tokens remaining"
 
-splitOn :: Char -> String -> [String]
-splitOn _ [] = []
-splitOn delim str =
-  let (first, remainder) = break (== delim) str
-   in first : case remainder of
-        [] -> []
-        (_ : rest) -> splitOn delim rest
+parseAssumptions_ :: Parser [Prop]
+parseAssumptions_ tokens =
+  let (p, rest) = parseProp_ tokens
+   in case rest of
+        (TComma : rest_) ->
+          let (ps, rest'') = parseAssumptions_ rest_
+           in (p : ps, rest'')
+        (TEOF : _) ->
+          ([p], rest)
+        _ ->
+          ([p], rest)
 
 -- Parser for Tactic
 
