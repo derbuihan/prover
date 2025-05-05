@@ -1,6 +1,7 @@
 module Parser where
 
 import Data.Char
+import GHC.Conc (par)
 import Types
 
 -- Tokenizer
@@ -14,6 +15,7 @@ tokenize ('|' : xs) = TOr : tokenize xs
 tokenize ('(' : xs) = TLParen : tokenize xs
 tokenize (')' : xs) = TRParen : tokenize xs
 tokenize (',' : xs) = TComma : tokenize xs
+tokenize ('.' : xs) = TDot : tokenize xs
 tokenize ('-' : '>' : xs) = TImp : tokenize xs
 tokenize ('<' : '-' : '>' : xs) = TIff : tokenize xs
 tokenize (x : xs)
@@ -45,7 +47,7 @@ convertKeywords keyword =
     "dn" -> TDn
     "contra" -> TContra
     "done" -> TDone
-    _ -> TAtom keyword
+    _ -> TStr keyword
 
 -- Parser for Prop
 
@@ -102,17 +104,23 @@ parseNot :: Parser Prop
 parseNot (TNot : tokens) =
   let (prop, rest) = parseNot tokens
    in (Not prop, rest)
-parseNot tokens = parseAtom tokens
+parseNot tokens = parseParents tokens
 
-parseAtom :: Parser Prop
-parseAtom (TFalsum : tokens) = (Falsum, tokens)
-parseAtom (TAtom s : tokens) = (Atom s, tokens)
-parseAtom (TLParen : tokens) =
+parseParents :: Parser Prop
+parseParents (TLParen : tokens) =
   let (prop, rest) = parseIff tokens
    in case rest of
         (TRParen : rest') -> (prop, rest')
         _ -> error "Expected closing parenthesis"
-parseAtom _ = error "Expected atom or parenthesis"
+parseParents tokens = parseFalsum tokens
+
+parseFalsum :: Parser Prop
+parseFalsum (TFalsum : tokens) = (Falsum, tokens)
+parseFalsum tokens = parseAtom tokens
+
+parseAtom :: Parser Prop
+parseAtom (TStr s : tokens) = (Atom s [], tokens)
+parseAtom _ = error "Expected atom"
 
 -- Parser for Assumptions
 

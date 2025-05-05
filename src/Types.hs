@@ -2,7 +2,7 @@ module Types where
 
 data Token
   = TFalsum -- ⊥, False
-  | TAtom String -- x, y
+  | TStr String -- x, y
   | TNot -- !
   | TAnd -- &
   | TOr -- \|
@@ -30,24 +30,34 @@ data Token
   | TDone -- done
   deriving (Eq, Show)
 
+data Term
+  = Var String -- x, y
+  | Func String [Term] -- f(x, y), g(x)
+  deriving (Eq, Show)
+
 data Prop
   = Falsum -- False, Falsum, ⊥
-  | Atom String -- x, y
-  | Not Prop -- !x
-  | And Prop Prop -- x & y
-  | Or Prop Prop -- x | y
-  | Imp Prop Prop -- x -> y
-  | Iff Prop Prop -- x <-> y
+  | Atom String [Term] -- x, y, p(x), q(x, y)
+  | Not Prop -- !p
+  | And Prop Prop -- p & q
+  | Or Prop Prop -- p | q
+  | Imp Prop Prop -- p -> q
+  | Iff Prop Prop -- p <-> q
+  | Forall String Prop -- ∀x. p
+  | Exists String Prop -- ∃x. p
   deriving (Eq)
 
 instance Show Prop where
   show Falsum = "⊥"
-  show (Atom s) = s
+  show (Atom s []) = s
+  show (Atom s ts) = s ++ "(" ++ concatMap show ts ++ ")"
   show (Not p) = "!" ++ show p
   show (And p1 p2) = "(" ++ show p1 ++ " & " ++ show p2 ++ ")"
   show (Or p1 p2) = "(" ++ show p1 ++ " | " ++ show p2 ++ ")"
   show (Imp p1 p2) = "(" ++ show p1 ++ " -> " ++ show p2 ++ ")"
   show (Iff p1 p2) = "(" ++ show p1 ++ " <-> " ++ show p2 ++ ")"
+  show (Forall s p) = "∀" ++ s ++ ". " ++ show p
+  show (Exists s p) = "∃" ++ s ++ ". " ++ show p
 
 data Tactic
   = Assume Prop Prop -- assume p for q
