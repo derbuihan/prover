@@ -65,13 +65,13 @@ parseProp_ = parseForall
 
 parseForall :: Parser Prop
 parseForall (TForall : TStr s : TDot : tokens) =
-  let (prop, rest) = parseIff tokens
+  let (prop, rest) = parseForall tokens
    in (Forall s prop, rest)
 parseForall tokens = parseExists tokens
 
 parseExists :: Parser Prop
 parseExists (TExists : TStr s : TDot : tokens) =
-  let (prop, rest) = parseIff tokens
+  let (prop, rest) = parseExists tokens
    in (Exists s prop, rest)
 parseExists tokens = parseIff tokens
 
@@ -115,15 +115,15 @@ parseNot :: Parser Prop
 parseNot (TNot : tokens) =
   let (prop, rest) = parseNot tokens
    in (Not prop, rest)
-parseNot tokens = parseParents tokens
+parseNot tokens = parseParen tokens
 
-parseParents :: Parser Prop
-parseParents (TLParen : tokens) =
-  let (prop, rest) = parseIff tokens
+parseParen :: Parser Prop
+parseParen (TLParen : tokens) =
+  let (prop, rest) = parseProp_ tokens
    in case rest of
         (TRParen : rest') -> (prop, rest')
         _ -> error "Expected closing parenthesis"
-parseParents tokens = parseFalsum tokens
+parseParen tokens = parseFalsum tokens
 
 parseFalsum :: Parser Prop
 parseFalsum (TFalsum : tokens) = (Falsum, tokens)
@@ -134,7 +134,7 @@ parseAtom (TStr s : TLParen : tokens) =
   let (terms, rest) = parseArgs tokens
    in (Atom s terms, rest)
 parseAtom (TStr s : tokens) = (Atom s [], tokens)
-parseAtom _ = error "Expected atom"
+parseAtom tokens = parseProp_ tokens
 
 -- Parser for Terms
 
@@ -154,6 +154,7 @@ parseTerm_ (TStr s : tokens) = (Var s, tokens)
 parseTerm_ _ = error "Expected term"
 
 parseArgs :: Parser [Term]
+parseArgs [] = ([], [])
 parseArgs tokens =
   let (term, rest) = parseTerm_ tokens
    in case rest of
@@ -181,8 +182,6 @@ parseAssumptions_ tokens =
         (TComma : rest_) ->
           let (ps, rest'') = parseAssumptions_ rest_
            in (p : ps, rest'')
-        (TEOF : _) ->
-          ([p], rest)
         _ ->
           ([p], rest)
 

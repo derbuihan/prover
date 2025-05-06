@@ -115,6 +115,12 @@ specParsePredLogic = do
         expected = Exists "x" (Or (Atom "P" [Var "x"]) (Atom "Q" [Func "f" [Var "y", Var "z"], Var "w"]))
     actual `shouldBe` expected
 
+  it "nested quantifiers" $ do
+    let input = "forall x. exists y. forall z. P(x, y, z)"
+        actual = parseProp input
+        expected = Forall "x" (Exists "y" (Forall "z" (Atom "P" [Var "x", Var "y", Var "z"])))
+    actual `shouldBe` expected
+
 specParseTerm :: Spec
 specParseTerm = do
   it "variable" $ do
