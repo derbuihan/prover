@@ -121,6 +121,18 @@ specParsePredLogic = do
         expected = Forall "x" (Exists "y" (Forall "z" (Atom "P" [Var "x", Var "y", Var "z"])))
     actual `shouldBe` expected
 
+  it "multiple forall" $ do
+    let input = "forall x y z. P(x, y, z)"
+        actual = parseProp input
+        expected = Forall "x" (Forall "y" (Forall "z" (Atom "P" [Var "x", Var "y", Var "z"])))
+    actual `shouldBe` expected
+
+  it "multiple exists" $ do
+    let input = "exists x y z. P(x, y, z)"
+        actual = parseProp input
+        expected = Exists "x" (Exists "y" (Exists "z" (Atom "P" [Var "x", Var "y", Var "z"])))
+    actual `shouldBe` expected
+
 specParseTerm :: Spec
 specParseTerm = do
   it "variable" $ do

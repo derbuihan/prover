@@ -64,51 +64,60 @@ parseProp_ :: Parser Prop
 parseProp_ = parseForall
 
 parseForall :: Parser Prop
-parseForall (TForall : TStr s : TDot : tokens) =
-  let (prop, rest) = parseForall tokens
-   in (Forall s prop, rest)
+parseForall (TForall : tokens) =
+  let (vars, rest) = collectVarsUntilDot tokens
+      (prop, rest_) = parseForall rest
+   in (foldr Forall prop vars, rest_)
 parseForall tokens = parseExists tokens
 
 parseExists :: Parser Prop
-parseExists (TExists : TStr s : TDot : tokens) =
-  let (prop, rest) = parseExists tokens
-   in (Exists s prop, rest)
+parseExists (TExists : tokens) =
+  let (vars, rest) = collectVarsUntilDot tokens
+      (prop, rest_) = parseExists rest
+   in (foldr Exists prop vars, rest_)
 parseExists tokens = parseIff tokens
+
+collectVarsUntilDot :: Parser [String]
+collectVarsUntilDot (TStr s : TDot : tokens) = ([s], tokens)
+collectVarsUntilDot (TStr s : tokens) =
+  let (vars, rest) = collectVarsUntilDot tokens
+   in (s : vars, rest)
+collectVarsUntilDot tokens = error $ "Expected variable followed by dot" ++ show tokens
 
 parseIff :: Parser Prop
 parseIff tokens =
   let (left, rest) = parseImply tokens
    in case rest of
-        (TIff : rest') ->
-          let (right, rest'') = parseIff rest'
-           in (Iff left right, rest'')
+        (TIff : rest_) ->
+          let (right, rest__) = parseIff rest_
+           in (Iff left right, rest__)
         _ -> (left, rest)
 
 parseImply :: Parser Prop
 parseImply tokens =
   let (left, rest) = parseOr tokens
    in case rest of
-        (TImp : rest') ->
-          let (right, rest'') = parseImply rest'
-           in (Imp left right, rest'')
+        (TImp : rest_) ->
+          let (right, rest__) = parseImply rest_
+           in (Imp left right, rest__)
         _ -> (left, rest)
 
 parseOr :: Parser Prop
 parseOr tokens =
   let (left, rest) = parseAnd tokens
    in case rest of
-        (TOr : rest') ->
-          let (right, rest'') = parseOr rest'
-           in (Or left right, rest'')
+        (TOr : rest_) ->
+          let (right, rest__) = parseOr rest_
+           in (Or left right, rest__)
         _ -> (left, rest)
 
 parseAnd :: Parser Prop
 parseAnd tokens =
   let (left, rest) = parseNot tokens
    in case rest of
-        (TAnd : rest') ->
-          let (right, rest'') = parseAnd rest'
-           in (And left right, rest'')
+        (TAnd : rest_) ->
+          let (right, rest__) = parseAnd rest_
+           in (And left right, rest__)
         _ -> (left, rest)
 
 parseNot :: Parser Prop
@@ -121,7 +130,7 @@ parseParen :: Parser Prop
 parseParen (TLParen : tokens) =
   let (prop, rest) = parseProp_ tokens
    in case rest of
-        (TRParen : rest') -> (prop, rest')
+        (TRParen : rest_) -> (prop, rest_)
         _ -> error "Expected closing parenthesis"
 parseParen tokens = parseFalsum tokens
 
@@ -158,10 +167,10 @@ parseArgs [] = ([], [])
 parseArgs tokens =
   let (term, rest) = parseTerm_ tokens
    in case rest of
-        (TComma : rest') ->
-          let (terms, rest'') = parseArgs rest'
-           in (term : terms, rest'')
-        (TRParen : rest') -> ([term], rest')
+        (TComma : rest_) ->
+          let (terms, rest__) = parseArgs rest_
+           in (term : terms, rest__)
+        (TRParen : rest_) -> ([term], rest_)
         _ -> error "Expected comma or closing parenthesis"
 
 -- Parser for Assumptions
@@ -180,8 +189,8 @@ parseAssumptions_ tokens =
   let (p, rest) = parseProp_ tokens
    in case rest of
         (TComma : rest_) ->
-          let (ps, rest'') = parseAssumptions_ rest_
-           in (p : ps, rest'')
+          let (ps, rest__) = parseAssumptions_ rest_
+           in (p : ps, rest__)
         _ ->
           ([p], rest)
 
@@ -199,9 +208,9 @@ parseTactic_ :: Parser Tactic
 parseTactic_ (TAssume : tokens) =
   let (p, rest) = parseProp_ tokens
    in case rest of
-        (TFor : rest') ->
-          let (q, rest'') = parseProp_ rest'
-           in (Assume p q, rest'')
+        (TFor : rest_) ->
+          let (q, rest__) = parseProp_ rest_
+           in (Assume p q, rest__)
         _ -> error "Expected 'for' after 'assume'"
 parseTactic_ (TSuppose : tokens) =
   let (p, rest) = parseProp_ tokens
@@ -221,9 +230,9 @@ parseTactic_ (TOrIntro : tokens) =
 parseTactic_ (TOrElim : tokens) =
   let (p, rest) = parseProp_ tokens
    in case rest of
-        (TFor : rest') ->
-          let (q, rest'') = parseProp_ rest'
-           in (OrElim p q, rest'')
+        (TFor : rest_) ->
+          let (q, rest__) = parseProp_ rest_
+           in (OrElim p q, rest__)
         _ -> error "Expected 'for' after 'orE'"
 parseTactic_ (TImpIntro : tokens) =
   let (p, rest) = parseProp_ tokens
