@@ -28,6 +28,10 @@ data Token
   | TDn -- dn
   | TContra -- contra
   | TDone -- done
+  | TForallIntro -- forallI
+  | TForallElim -- forallE
+  | TExistsIntro -- existsI
+  | TExistsElim -- existsE
   deriving (Eq, Show)
 
 data Term
@@ -76,6 +80,10 @@ data Tactic
   | Dn Prop -- dn
   | Contra Prop Prop -- contra
   | Done -- done
+  | ForallIntro Term Prop -- forallI
+  | ForallElim Prop -- forallE
+  | ExistsIntro Term Prop -- existsI
+  | ExistsElim Term Prop Prop
   deriving (Eq)
 
 instance Show Tactic where
@@ -91,6 +99,10 @@ instance Show Tactic where
   show (Dn p) = "dn " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
+  show (ForallIntro t p) = "forallI " ++ show t ++ " " ++ show p
+  show (ForallElim p) = "forallE " ++ show p
+  show (ExistsIntro t p) = "existsI " ++ show t ++ " " ++ show p
+  show (ExistsElim t p1 p2) = "existsE " ++ show t ++ " " ++ show p1 ++ " for " ++ show p2
 
 data ProofState = ProofState
   { goal :: Prop,

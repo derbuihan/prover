@@ -186,3 +186,15 @@ specParseTactic = do
         actual = parseTactic input
         expected = Done
     actual `shouldBe` expected
+
+  it "forall intro" $ do
+    let input = "forallI x p(x)"
+        actual = parseTactic input
+        expected = ForallIntro (Var "x") (Atom "p" [Var "x"])
+    actual `shouldBe` expected
+
+  it "exists elim" $ do
+    let input = "existsE a p(a) for q"
+        actual = parseTactic input
+        expected = ExistsElim (Var "a") (Atom "p" [Var "a"]) (Atom "q" [])
+    actual `shouldBe` expected

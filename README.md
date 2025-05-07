@@ -13,7 +13,7 @@ This project is designed to implement natural deduction[^1].
 This proof assistant adopts the tactics from the Suppes–Lemmon notation[^2].
 The tactics are as follows:
 
-| Tactic     | example        | Description                                                                          |
+| Tactic     | Example        | Description                                                                          |
 | ---------- | -------------- | ------------------------------------------------------------------------------------ |
 | assume     | assume p for q | assume p for goal q (where p is any proposition)                                     |
 | suppose    | suppose p      | assume p for RAA (where p is any proposition)                                        |
@@ -27,6 +27,13 @@ The tactics are as follows:
 | dn         | dn p           | add p to assumptions (where !!p is in the assumptions)                               |
 | contra     | contra p !p    | when goal is contradiction, complete the proof (where p, !p are in the assumptions)  |
 | done       | done           | complete the proof when the goal is already in the assumptions                       |
+
+| Tactic  | Example              | Description                                                                |
+| ------- | -------------------- | -------------------------------------------------------------------------- |
+| forallI | forallI x p(x)       | add forall x. p(x) to assumptions (if p(a) is provedf for any a)           |
+| forallE | forallE p(a)         | add p(a) to assumptions (where forall x. p(x) is in the assumptions)       |
+| existsI | existsI a p(a)       | add exists x. p(x) to assumptions (where p(a) is in the assumptions)       |
+| existsE | existsE a p(a) for q | add p(a) for q to assumptions (where exists x. p(x) is in the assumptions) |
 
 # Usage
 

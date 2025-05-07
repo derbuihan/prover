@@ -46,6 +46,10 @@ convertKeywords keyword =
     "dn" -> TDn
     "contra" -> TContra
     "done" -> TDone
+    "forallI" -> TForallIntro
+    "forallE" -> TForallElim
+    "existsI" -> TExistsIntro
+    "existsE" -> TExistsElim
     _ -> TStr keyword
 
 -- Parser for Prop
@@ -249,5 +253,24 @@ parseTactic_ (TContra : tokens) =
       (q, rest_) = parseProp_ rest
    in (Contra p q, rest_)
 parseTactic_ (TDone : tokens) = (Done, tokens)
+parseTactic_ (TForallIntro : tokens) =
+  let (t, rest) = parseTerm_ tokens
+      (p, rest_) = parseProp_ rest
+   in (ForallIntro t p, rest_)
+parseTactic_ (TForallElim : tokens) =
+  let (p, rest) = parseProp_ tokens
+   in (ForallElim p, rest)
+parseTactic_ (TExistsIntro : tokens) =
+  let (t, rest) = parseTerm_ tokens
+      (p, rest_) = parseProp_ rest
+   in (ExistsIntro t p, rest_)
+parseTactic_ (TExistsElim : tokens) =
+  let (t, rest) = parseTerm_ tokens
+      (p, rest_) = parseProp_ rest
+   in case rest_ of
+        (TFor : rest__) ->
+          let (q, rest___) = parseProp_ rest__
+           in (ExistsElim t p q, rest___)
+        _ -> error "Expected 'for' after 'existsE'"
 parseTactic_ (x : _) = error $ "Invalid tactic: " ++ show x
 parseTactic_ [] = error "Empty tactic"
