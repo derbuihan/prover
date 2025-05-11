@@ -28,6 +28,7 @@ data Token
   | TDn -- dn
   | TContra -- contra
   | TDone -- done
+  | TFix -- fix
   | TForallIntro -- forallI
   | TForallElim -- forallE
   | TExistsIntro -- existsI
@@ -56,7 +57,18 @@ data Prop
   | Iff Prop Prop -- p <-> q
   | Forall String Prop -- ∀x. p
   | Exists String Prop -- ∃x. p
-  deriving (Eq)
+
+instance Eq Prop where
+  Falsum == Falsum = True
+  (Atom s1 ts1) == (Atom s2 ts2) = s1 == s2 && ts1 == ts2
+  (Not p1) == (Not p2) = p1 == p2
+  (And p1 p2) == (And p3 p4) = (p1 == p3 && p2 == p4) || (p1 == p4 && p2 == p3)
+  (Or p1 p2) == (Or p3 p4) = (p1 == p3 && p2 == p4) || (p1 == p4 && p2 == p3)
+  (Imp p1 p2) == (Imp p3 p4) = (p1 == p3 && p2 == p4) || (p1 == p4 && p2 == p3)
+  (Iff p1 p2) == (Iff p3 p4) = (p1 == p3 && p2 == p4) || (p1 == p4 && p2 == p3)
+  (Forall _ p1) == (Forall _ p2) = p1 == p2
+  (Exists _ p1) == (Exists _ p2) = p1 == p2
+  _ == _ = False
 
 instance Show Prop where
   show Falsum = "⊥"
@@ -83,6 +95,7 @@ data Tactic
   | Dn Prop -- dn
   | Contra Prop Prop -- contra
   | Done -- done
+  | Fix Term -- fix
   | ForallIntro Term Prop -- forallI
   | ForallElim Term Prop -- forallE
   | ExistsIntro Term Prop -- existsI
@@ -102,6 +115,7 @@ instance Show Tactic where
   show (Dn p) = "dn " ++ show p
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
+  show (Fix t) = "fix " ++ show t
   show (ForallIntro t p) = "forallI " ++ show t ++ " " ++ show p
   show (ForallElim t p) = "forallE " ++ show t ++ " " ++ show p
   show (ExistsIntro t p) = "existsI " ++ show t ++ " " ++ show p
@@ -112,19 +126,21 @@ data ProofState = ProofState
     assumptions :: [Prop],
     subProofs :: [ProofState],
     tactics :: [Tactic],
-    completed :: Bool
+    completed :: Bool,
+    fixed :: [Term]
   }
   deriving (Eq)
 
 printProofState :: Int -> ProofState -> String
-printProofState _ (ProofState _ _ _ _ True) = ""
-printProofState level (ProofState g a s t _) =
+printProofState _ (ProofState _ _ _ _ True _) = ""
+printProofState level state =
   unlines $
-    [ indent ++ "Goal: " ++ show g,
-      indent ++ "Assumptions: " ++ show a,
-      indent ++ "Tactics: " ++ show t
+    [ indent ++ "Goal: " ++ show (goal state),
+      indent ++ "Assumptions: " ++ show (assumptions state),
+      indent ++ "Tactics: " ++ show (tactics state),
+      indent ++ "Fixed: " ++ show (fixed state)
     ]
-      ++ map (printProofState (level + 1)) s
+      ++ map (printProofState (level + 1)) (subProofs state)
   where
     indent = replicate (level * 2) ' '
 

@@ -1,19 +1,8 @@
 module Main where
 
-import Parser
+import Convert
 import Prove
 import Types
-
--- main :: IO ()
--- main = do
---   putStrLn "Enter a prop:"
---   input <- getLine
---   let tokens = tokenize input
---       (parsedProp, _) = parseProp_ tokens
---       convertedProp = convertProp parsedProp
---   putStrLn $ "Tokens: " ++ show tokens
---   putStrLn $ "Parsed Prop: " ++ show parsedProp
---   putStrLn $ "Converted Prop: " ++ show convertedProp
 
 main :: IO ()
 main = do
@@ -22,8 +11,8 @@ main = do
   goalInput <- getLine
   putStrLn "Enter assumptions (separated by commas): "
   assumptionsInput <- getLine
-  let parsedGoal = parseProp goalInput
-      parsedAssum = parseAssumptions assumptionsInput
+  let parsedGoal = parseAndConvertProp goalInput
+      parsedAssum = parseAndConvertAssumptions assumptionsInput
   loop $ initState parsedGoal parsedAssum
 
 initState :: Prop -> [Prop] -> ProofState
@@ -33,7 +22,8 @@ initState parsedGoal parsedAssum =
       assumptions = parsedAssum,
       subProofs = [],
       tactics = [],
-      completed = False
+      completed = False,
+      fixed = []
     }
 
 loop :: ProofState -> IO ()
@@ -41,7 +31,7 @@ loop state = do
   print state
   putStrLn "Enter a step: "
   stepInput <- getLine
-  let tactic = parseTactic stepInput
+  let tactic = parseAndConvertTactic stepInput
       newState = prove tactic state
   if completed newState
     then do

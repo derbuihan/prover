@@ -1,5 +1,6 @@
 module Convert where
 
+import Parser
 import Types
 
 type Env = [(String, Int)]
@@ -34,3 +35,76 @@ convertTerm env (Var s) =
     Nothing -> Var s
 convertTerm env (Func s ts) = Func s (map (convertTerm env) ts)
 convertTerm _ (VarInt i) = VarInt i
+
+-- Parse and Convert
+
+parseAndConvertProp :: String -> Prop
+parseAndConvertProp s =
+  let prop = parseProp s
+   in convertProp prop
+
+parseAndConvertAssumptions :: String -> [Prop]
+parseAndConvertAssumptions = map convertProp . parseAssumptions
+
+parseAndConvertTactic :: String -> Tactic
+parseAndConvertTactic s =
+  let tokens = tokenize s
+      (tactic, rest) = parseTactic_ tokens
+   in case rest of
+        [TEOF] -> convertTactic tactic
+        _ -> error "Parsing failed, unexpected tokens remaining"
+
+convertTactic :: Tactic -> Tactic
+convertTactic (Assume p q) =
+  let p_ = convertProp p
+      q_ = convertProp q
+   in Assume p_ q_
+convertTactic (Suppose p) =
+  let p_ = convertProp p
+   in Suppose p_
+convertTactic (AndIntro p) =
+  let p_ = convertProp p
+   in AndIntro p_
+convertTactic (AndElimLeft p) =
+  let p_ = convertProp p
+   in AndElimLeft p_
+convertTactic (AndElimRight p) =
+  let p_ = convertProp p
+   in AndElimRight p_
+convertTactic (OrIntro p) =
+  let p_ = convertProp p
+   in OrIntro p_
+convertTactic (OrElim p q) =
+  let p_ = convertProp p
+      q_ = convertProp q
+   in OrElim p_ q_
+convertTactic (ImpIntro p) =
+  let p_ = convertProp p
+   in ImpIntro p_
+convertTactic (ImpElim p1 p2) =
+  let p1_ = convertProp p1
+      p2_ = convertProp p2
+   in ImpElim p1_ p2_
+convertTactic (Dn p) =
+  let p_ = convertProp p
+   in Dn p_
+convertTactic (Contra p1 p2) =
+  let p1_ = convertProp p1
+      p2_ = convertProp p2
+   in Contra p1_ p2_
+convertTactic Done = Done
+convertTactic (Fix t) =
+  let t_ = convertTerm [] t
+   in Fix t_
+convertTactic (ForallIntro t p) =
+  let p_ = convertProp p
+   in ForallIntro t p_
+convertTactic (ForallElim t p) =
+  let p_ = convertProp p
+   in ForallElim t p_
+convertTactic (ExistsIntro t p) =
+  let p_ = convertProp p
+   in ExistsIntro t p_
+convertTactic (ExistsElim t p) =
+  let p_ = convertProp p
+   in ExistsElim t p_

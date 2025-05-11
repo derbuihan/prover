@@ -18,7 +18,8 @@ specProve = do
               assumptions = [],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (Assume (Atom "x" []) (Atom "y" [])) input
         expected =
@@ -31,11 +32,13 @@ specProve = do
                       assumptions = [Atom "x" []],
                       subProofs = [],
                       tactics = [],
-                      completed = False
+                      completed = False,
+                      fixed = []
                     }
                 ],
               tactics = [Assume (Atom "x" []) (Atom "y" [])],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -46,7 +49,8 @@ specProve = do
               assumptions = [],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (Suppose (Atom "x" [])) input
         expected =
@@ -59,11 +63,13 @@ specProve = do
                       assumptions = [Atom "x" []],
                       subProofs = [],
                       tactics = [],
-                      completed = False
+                      completed = False,
+                      fixed = []
                     }
                 ],
               tactics = [Suppose (Atom "x" [])],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -74,7 +80,8 @@ specProve = do
               assumptions = [Atom "x" [], Atom "y" []],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (AndIntro (And (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -83,7 +90,8 @@ specProve = do
               assumptions = [And (Atom "x" []) (Atom "y" []), Atom "x" [], Atom "y" []],
               subProofs = [],
               tactics = [AndIntro (And (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -94,7 +102,8 @@ specProve = do
               assumptions = [And (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (AndElimLeft (And (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -103,7 +112,8 @@ specProve = do
               assumptions = [Atom "x" [], And (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [AndElimLeft (And (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -114,7 +124,8 @@ specProve = do
               assumptions = [And (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (AndElimRight (And (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -123,7 +134,8 @@ specProve = do
               assumptions = [Atom "y" [], And (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [AndElimRight (And (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -134,7 +146,8 @@ specProve = do
               assumptions = [Atom "x" []],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (OrIntro (Or (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -143,7 +156,8 @@ specProve = do
               assumptions = [Or (Atom "x" []) (Atom "y" []), Atom "x" []],
               subProofs = [],
               tactics = [OrIntro (Or (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -154,7 +168,8 @@ specProve = do
               assumptions = [Or (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (OrElim (Or (Atom "x" []) (Atom "y" [])) (Atom "z" [])) input
         expected =
@@ -167,18 +182,21 @@ specProve = do
                       assumptions = [Atom "x" [], Or (Atom "x" []) (Atom "y" [])],
                       subProofs = [],
                       tactics = [],
-                      completed = False
+                      completed = False,
+                      fixed = []
                     },
                   ProofState
                     { goal = Atom "z" [],
                       assumptions = [Atom "y" [], Or (Atom "x" []) (Atom "y" [])],
                       subProofs = [],
                       tactics = [],
-                      completed = False
+                      completed = False,
+                      fixed = []
                     }
                 ],
               tactics = [OrElim (Or (Atom "x" []) (Atom "y" [])) (Atom "z" [])],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -189,7 +207,8 @@ specProve = do
               assumptions = [Atom "x" [], Atom "y" []],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (ImpIntro (Imp (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -198,7 +217,8 @@ specProve = do
               assumptions = [Imp (Atom "x" []) (Atom "y" []), Atom "x" [], Atom "y" []],
               subProofs = [],
               tactics = [ImpIntro (Imp (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -209,7 +229,8 @@ specProve = do
               assumptions = [Atom "x" [], Imp (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (ImpElim (Atom "x" []) (Imp (Atom "x" []) (Atom "y" []))) input
         expected =
@@ -218,7 +239,8 @@ specProve = do
               assumptions = [Atom "y" [], Atom "x" [], Imp (Atom "x" []) (Atom "y" [])],
               subProofs = [],
               tactics = [ImpElim (Atom "x" []) (Imp (Atom "x" []) (Atom "y" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -229,7 +251,8 @@ specProve = do
               assumptions = [Not (Not (Atom "x" []))],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (Dn (Atom "x" [])) input
         expected =
@@ -238,7 +261,8 @@ specProve = do
               assumptions = [Atom "x" [], Not (Not (Atom "x" []))],
               subProofs = [],
               tactics = [Dn (Atom "x" [])],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -249,7 +273,8 @@ specProve = do
               assumptions = [Atom "x" [], Not (Atom "x" [])],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove (Contra (Atom "x" []) (Not (Atom "x" []))) input
         expected =
@@ -258,7 +283,8 @@ specProve = do
               assumptions = [Falsum, Atom "x" [], Not (Atom "x" [])],
               subProofs = [],
               tactics = [Contra (Atom "x" []) (Not (Atom "x" []))],
-              completed = False
+              completed = False,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -269,7 +295,8 @@ specProve = do
               assumptions = [Atom "x" []],
               subProofs = [],
               tactics = [],
-              completed = False
+              completed = False,
+              fixed = []
             }
         actual = prove Done input
         expected =
@@ -278,7 +305,8 @@ specProve = do
               assumptions = [Atom "x" []],
               subProofs = [],
               tactics = [Done],
-              completed = True
+              completed = True,
+              fixed = []
             }
     actual `shouldBe` expected
 
@@ -291,7 +319,8 @@ specHelpers = do
               assumptions = [Atom "x" [], Atom "y" []],
               subProofs = [],
               tactics = [],
-              completed = True
+              completed = True,
+              fixed = []
             }
         actual = isInAssumptions (Atom "x" []) input
         expected = True

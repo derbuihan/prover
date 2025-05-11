@@ -46,6 +46,7 @@ convertKeywords keyword =
     "dn" -> TDn
     "contra" -> TContra
     "done" -> TDone
+    "fix" -> TFix
     "forallI" -> TForallIntro
     "forallE" -> TForallElim
     "existsI" -> TExistsIntro
@@ -253,6 +254,9 @@ parseTactic_ (TContra : tokens) =
       (q, rest_) = parseProp_ rest
    in (Contra p q, rest_)
 parseTactic_ (TDone : tokens) = (Done, tokens)
+parseTactic_ (TFix : tokens) =
+  let (t, rest) = parseTerm_ tokens
+   in (Fix t, rest)
 parseTactic_ (TForallIntro : tokens) =
   let (t, rest) = parseTerm_ tokens
       (p, rest_) = parseProp_ rest

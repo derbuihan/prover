@@ -1,5 +1,6 @@
 module Prove where
 
+import Convert
 import Types
 
 prove :: Tactic -> ProofState -> ProofState
@@ -28,6 +29,7 @@ update tactic state =
     Dn p -> dnRule p state
     Contra p np -> contraRule p np state
     Done -> doneRule state
+    Fix t -> fixRule t state
     ForallIntro t p -> forallIntroRule t p state
     ForallElim t p -> forallElimRule t p state
     -- ExistsIntro t p -> existsIntroRule t p state
@@ -195,30 +197,32 @@ doneRule state
   | otherwise =
       error "Proof is not complete, assumptions do not match the goal"
 
+fixRule :: Term -> ProofState -> ProofState
+fixRule t state = state {fixed = t : fixed state}
+
 --  forallI a p(a)
 forallIntroRule :: Term -> Prop -> ProofState -> ProofState
-forallIntroRule (Var a) (Atom p [Var a_]) state
-  | isInAssumptions (Atom p [Var a_]) state =
-      state
-        { assumptions = Forall a (Atom p [Var a_]) : assumptions state,
-          tactics = ForallIntro (Var a) (Atom p [Var a_]) : tactics state
-        }
+forallIntroRule (Var a) prop state
+  | isInAssumptions prop state && isInFixed (Var a) state =
+      let convertedProp = convertProp (Forall a prop)
+       in state
+            { assumptions = convertedProp : assumptions state,
+              tactics = ForallIntro (Var a) prop : tactics state
+            }
   | otherwise =
       error "Forall Introduction is not valid in the current context"
 forallIntroRule _ _ _ =
   error "Forall Introduction must be applied to a proposition with a variable"
 
+-- forallE a forall x. p(x)
 forallElimRule :: Term -> Prop -> ProofState -> ProofState
 forallElimRule (Var a) (Forall x p) state
-  | isInAssumptions (Forall x p) state =
-      case p of
-        Atom p_ [Var _] ->
-          state
-            { assumptions = Atom p_ [Var a] : assumptions state,
-              tactics = ForallIntro (Var a) (Forall x p) : tactics state
+  | isInAssumptions (Forall x p) state && isInFixed (Var a) state =
+      let p_ = substituteVarProp (Var a) p
+       in state
+            { assumptions = p_ : assumptions state,
+              tactics = ForallElim (Var a) (Forall x p) : tactics state
             }
-        _ ->
-          error "Forall Introduction is not valid in the current context"
 forallElimRule _ _ _ =
   error "Forall Introduction must be applied to a Forall proposition"
 
@@ -230,3 +234,29 @@ forallElimRule _ _ _ =
 isInAssumptions :: Prop -> ProofState -> Bool
 isInAssumptions prop state =
   prop `elem` assumptions state
+
+isInFixed :: Term -> ProofState -> Bool
+isInFixed term state =
+  term `elem` fixed state
+
+substituteVarProp :: Term -> Prop -> Prop
+substituteVarProp term = substituteAtLevel term 0
+  where
+    substituteAtLevel :: Term -> Int -> Prop -> Prop
+    substituteAtLevel t level Falsum = Falsum
+    substituteAtLevel t level (Atom s ts) = Atom s (map (substituteVarTerm t level) ts)
+    substituteAtLevel t level (Not p) = Not (substituteAtLevel t level p)
+    substituteAtLevel t level (And p1 p2) = And (substituteAtLevel t level p1) (substituteAtLevel t level p2)
+    substituteAtLevel t level (Or p1 p2) = Or (substituteAtLevel t level p1) (substituteAtLevel t level p2)
+    substituteAtLevel t level (Imp p1 p2) = Imp (substituteAtLevel t level p1) (substituteAtLevel t level p2)
+    substituteAtLevel t level (Iff p1 p2) = Iff (substituteAtLevel t level p1) (substituteAtLevel t level p2)
+    substituteAtLevel t level (Forall s p) = Forall s (substituteAtLevel t (level + 1) p)
+    substituteAtLevel t level (Exists s p) = Exists s (substituteAtLevel t (level + 1) p)
+
+substituteVarTerm :: Term -> Int -> Term -> Term
+substituteVarTerm term level (VarInt i)
+  | i == level = term
+  | i > level = VarInt (i - 1)
+  | otherwise = VarInt i
+substituteVarTerm term level (Func s ts) = Func s (map (substituteVarTerm term level) ts)
+substituteVarTerm _ _ v@(Var _) = v

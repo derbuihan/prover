@@ -150,6 +150,7 @@ forall x. !p(x) -> !exists x. p(x)
 Assumptions:
 
 - p(a) -- a = Var a
+- fixed a
 
 Tactics:
 
@@ -203,10 +204,3 @@ Assumptions:
 
 - exists x. p(x)
 - p(a) -- a = Const a
-
-## de Bruijn Index
-
-| Orignal             | Prop                                                  | Indexed Prop                                            |
-| ------------------- | ----------------------------------------------------- | ------------------------------------------------------- |
-| forall x. p(x)      | Forall "x" (Atom "p" [Var "x"])                       | Forall "x" (Atom "p" [VarInt 0])                        |
-| forall x y. p(x, y) | Forall "x" (Forall "y" (Atom "p" [Var "x", Var "y"])) | Forall "x" (Forall "y" (Atom "p" [VarInt 1, VarInt 0])) |

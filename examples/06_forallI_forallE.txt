@@ -1,0 +1,8 @@
+forall x. p(x) & q(x)
+forall x. p(x), forall x. q(x)
+fix a
+forallE a forall x. p(x)
+forallE a forall x. q(x)
+andI p(a) & q(a)
+forallI a p(a) & q(a)
+done
