@@ -4,6 +4,17 @@ import Parser
 import Prove
 import Types
 
+-- main :: IO ()
+-- main = do
+--   putStrLn "Enter a prop:"
+--   input <- getLine
+--   let tokens = tokenize input
+--       (parsedProp, _) = parseProp_ tokens
+--       convertedProp = convertProp parsedProp
+--   putStrLn $ "Tokens: " ++ show tokens
+--   putStrLn $ "Parsed Prop: " ++ show parsedProp
+--   putStrLn $ "Converted Prop: " ++ show convertedProp
+
 main :: IO ()
 main = do
   putStrLn "Welcome to the Prover!"

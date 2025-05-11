@@ -28,12 +28,12 @@ The tactics are as follows:
 | contra     | contra p !p    | when goal is contradiction, complete the proof (where p, !p are in the assumptions)  |
 | done       | done           | complete the proof when the goal is already in the assumptions                       |
 
-| Tactic  | Example              | Description                                                                |
-| ------- | -------------------- | -------------------------------------------------------------------------- |
-| forallI | forallI x p(x)       | add forall x. p(x) to assumptions (if p(a) is provedf for any a)           |
-| forallE | forallE p(a)         | add p(a) to assumptions (where forall x. p(x) is in the assumptions)       |
-| existsI | existsI a p(a)       | add exists x. p(x) to assumptions (where p(a) is in the assumptions)       |
-| existsE | existsE a p(a) for q | add p(a) for q to assumptions (where exists x. p(x) is in the assumptions) |
+| Tactic  | Example                  | Description                                                                |
+| ------- | ------------------------ | -------------------------------------------------------------------------- |
+| forallI | forallI a p(a)           | add forall x. p(x) to assumptions (if p(a) is provedf for any a)           |
+| forallE | forallE a forall x. p(x) | add p(a) to assumptions (where forall x. p(x) is in the assumptions)       |
+| existsI | existsI a p(a)           | add exists x. p(x) to assumptions (where p(a) is in the assumptions)       |
+| existsE | existsE a exists x. p(x) | add p(a) for q to assumptions (where exists x. p(x) is in the assumptions) |
 
 # Usage
 
@@ -81,3 +81,132 @@ $ bash ./example/run.sh
 
 [^1]: https://en.wikipedia.org/wiki/Natural_deduction
 [^2]: https://en.wikipedia.org/wiki/Suppes%E2%80%93Lemmon_notation
+
+# First-order predicate logic
+
+## forall x. p(x) -> exists x. p(x)
+
+```
+$ cabal run
+Welcome to the Prover!
+Enter a goal: exists x. p(x)
+Enter assumptions (separated by commas): forall x. p(x)
+
+Goal: (exists x. p(x))
+Assumptions: [forall x. p(x)]
+Enter a step: forallE a forall x. p(x)
+
+Goal: (exists x. p(x))
+Assumptions: [p(a), forall x. p(x)]
+Enter a step: existsI p(a) exists x. p(x)
+
+Goal: (exists x. p(x))
+Assumptions: [exists x. p(x), p(a), forall x. p(x)]
+Enter a step: done
+```
+
+## !exists x. p(x) -> forall x. !p(x)
+
+```
+$ cabal run
+Welcome to the Prover!
+Enter a goal: forall x. !p(x)
+Enter assumptions (separated by commas): !exists x. p(x)
+
+Goal: (forall x. !p(x))
+Assumptions: [!exists x. p(x)]
+Tactics: []
+
+Enter a step: suppose p(a)
+Goal: (forall x. !p(x))
+Assumptions: [p(a), !exists x. p(x)]
+Tactics: [suppose p(a)]
+
+Enter a step: existsI p(a) exists x. p(x)
+Goal: (forall x. !p(x))
+Assumptions: [exists x. p(x), p(a), !exists x. p(x)]
+Tactics: [existsI p(a) exists x. p(x)]
+
+Enter a step: contra p(a) !p(a)
+Goal: (forall x. !p(x))
+Assumptions: [!p(a), exists x. p(x), p(a), !exists x. p(x)]
+Tactics: [contra p(a) !p(a)]
+
+Enter a step: forallI a forall x. !p(x)
+Goal: (forall x. !p(x))
+Assumptions: [forall x. !p(x), !exists x. p(x)]
+Tactics: [forallI a forall x. !p(x)]
+
+Enter a step: done
+Goal: (forall x. !p(x))
+Assumptions: [!exists x. p(x)]
+Tactics: [done]
+```
+
+forall x. !p(x) -> !exists x. p(x)
+
+## forallI
+
+Assumptions:
+
+- p(a) -- a = Var a
+
+Tactics:
+
+- forallI a p(a)
+
+Assumptions:
+
+- forall x. p(x)
+
+## forallE
+
+Assumptions:
+
+- forall x. p(x)
+
+Tactics:
+
+- forallE a forall x. p(x)
+
+Assumptions:
+
+- forall x. p(x)
+- p(a) -- a = Var a
+
+## existsI
+
+Assumptions:
+
+- p(a) -- a = Const a
+
+Tactics:
+
+- existsI a p(a)
+
+Assumptions:
+
+- p(a) -- a = Const a
+- exists x. p(x)
+
+## existsE
+
+Assumptions:
+
+- exists x. p(x)
+
+Tactics:
+
+- existsE a exists x. p(x)
+
+Assumptions:
+
+- exists x. p(x)
+- p(a) -- a = Const a
+
+## de Bruijn Index
+
+| Orignal             | Prop                                                  | Indexed Prop                                            |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------------------- |
+| forall x. p(x)      | Forall "x" (Atom "p" [Var "x"])                       | Forall "x" (Atom "p" [VarInt 0])                        |
+| forall x y. p(x, y) | Forall "x" (Forall "y" (Atom "p" [Var "x", Var "y"])) | Forall "x" (Forall "y" (Atom "p" [VarInt 1, VarInt 0])) |

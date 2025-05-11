@@ -28,6 +28,11 @@ update tactic state =
     Dn p -> dnRule p state
     Contra p np -> contraRule p np state
     Done -> doneRule state
+    ForallIntro t p -> forallIntroRule t p state
+    ForallElim t p -> forallElimRule t p state
+    -- ExistsIntro t p -> existsIntroRule t p state
+    -- ExistsElim t p q -> existsElimRule t p q state
+    _ -> error "Invalid tactic"
 
 assumeRule :: Prop -> Prop -> ProofState -> ProofState
 assumeRule p q state =
@@ -189,6 +194,36 @@ doneRule state
         }
   | otherwise =
       error "Proof is not complete, assumptions do not match the goal"
+
+--  forallI a p(a)
+forallIntroRule :: Term -> Prop -> ProofState -> ProofState
+forallIntroRule (Var a) (Atom p [Var a_]) state
+  | isInAssumptions (Atom p [Var a_]) state =
+      state
+        { assumptions = Forall a (Atom p [Var a_]) : assumptions state,
+          tactics = ForallIntro (Var a) (Atom p [Var a_]) : tactics state
+        }
+  | otherwise =
+      error "Forall Introduction is not valid in the current context"
+forallIntroRule _ _ _ =
+  error "Forall Introduction must be applied to a proposition with a variable"
+
+forallElimRule :: Term -> Prop -> ProofState -> ProofState
+forallElimRule (Var a) (Forall x p) state
+  | isInAssumptions (Forall x p) state =
+      case p of
+        Atom p_ [Var _] ->
+          state
+            { assumptions = Atom p_ [Var a] : assumptions state,
+              tactics = ForallIntro (Var a) (Forall x p) : tactics state
+            }
+        _ ->
+          error "Forall Introduction is not valid in the current context"
+forallElimRule _ _ _ =
+  error "Forall Introduction must be applied to a Forall proposition"
+
+-- existsIntroRule :: Term -> Prop -> ProofState -> ProofState
+-- existsElimRule :: Term -> Prop -> Prop -> ProofState -> ProofState
 
 -- Helper functions
 

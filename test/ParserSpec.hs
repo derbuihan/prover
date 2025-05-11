@@ -194,7 +194,7 @@ specParseTactic = do
     actual `shouldBe` expected
 
   it "exists elim" $ do
-    let input = "existsE a p(a) for q"
+    let input = "existsE a p(a)"
         actual = parseTactic input
-        expected = ExistsElim (Var "a") (Atom "p" [Var "a"]) (Atom "q" [])
+        expected = ExistsElim (Var "a") (Atom "p" [Var "a"])
     actual `shouldBe` expected

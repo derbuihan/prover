@@ -36,11 +36,14 @@ data Token
 
 data Term
   = Var String -- x, y
+  | VarInt Int -- 1, 2
   | Func String [Term] -- f(x, y), g(x)
   deriving (Eq)
 
 instance Show Term where
   show (Var s) = s
+  show (VarInt i) = show i
+  show (Func s []) = s
   show (Func s ts) = s ++ "(" ++ concatMap show ts ++ ")"
 
 data Prop
@@ -81,9 +84,9 @@ data Tactic
   | Contra Prop Prop -- contra
   | Done -- done
   | ForallIntro Term Prop -- forallI
-  | ForallElim Prop -- forallE
+  | ForallElim Term Prop -- forallE
   | ExistsIntro Term Prop -- existsI
-  | ExistsElim Term Prop Prop
+  | ExistsElim Term Prop -- existsE
   deriving (Eq)
 
 instance Show Tactic where
@@ -100,9 +103,9 @@ instance Show Tactic where
   show (Contra p1 p2) = "contra " ++ show p1 ++ " " ++ show p2
   show Done = "done"
   show (ForallIntro t p) = "forallI " ++ show t ++ " " ++ show p
-  show (ForallElim p) = "forallE " ++ show p
+  show (ForallElim t p) = "forallE " ++ show t ++ " " ++ show p
   show (ExistsIntro t p) = "existsI " ++ show t ++ " " ++ show p
-  show (ExistsElim t p1 p2) = "existsE " ++ show t ++ " " ++ show p1 ++ " for " ++ show p2
+  show (ExistsElim t p) = "existsE " ++ show t ++ " " ++ show p
 
 data ProofState = ProofState
   { goal :: Prop,

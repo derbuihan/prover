@@ -258,8 +258,9 @@ parseTactic_ (TForallIntro : tokens) =
       (p, rest_) = parseProp_ rest
    in (ForallIntro t p, rest_)
 parseTactic_ (TForallElim : tokens) =
-  let (p, rest) = parseProp_ tokens
-   in (ForallElim p, rest)
+  let (t, rest) = parseTerm_ tokens
+      (p, rest_) = parseProp_ rest
+   in (ForallElim t p, rest_)
 parseTactic_ (TExistsIntro : tokens) =
   let (t, rest) = parseTerm_ tokens
       (p, rest_) = parseProp_ rest
@@ -267,10 +268,6 @@ parseTactic_ (TExistsIntro : tokens) =
 parseTactic_ (TExistsElim : tokens) =
   let (t, rest) = parseTerm_ tokens
       (p, rest_) = parseProp_ rest
-   in case rest_ of
-        (TFor : rest__) ->
-          let (q, rest___) = parseProp_ rest__
-           in (ExistsElim t p q, rest___)
-        _ -> error "Expected 'for' after 'existsE'"
+   in (ExistsElim t p, rest_)
 parseTactic_ (x : _) = error $ "Invalid tactic: " ++ show x
 parseTactic_ [] = error "Empty tactic"
