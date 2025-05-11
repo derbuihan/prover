@@ -33,7 +33,7 @@ update tactic state =
     ForallIntro t p -> forallIntroRule t p state
     ForallElim t p -> forallElimRule t p state
     -- ExistsIntro t p -> existsIntroRule t p state
-    -- ExistsElim t p q -> existsElimRule t p q state
+    ExistsElim t p -> existsElimRule t p state
     _ -> error "Invalid tactic"
 
 assumeRule :: Prop -> Prop -> ProofState -> ProofState
@@ -216,18 +216,33 @@ forallIntroRule _ _ _ =
 
 -- forallE a forall x. p(x)
 forallElimRule :: Term -> Prop -> ProofState -> ProofState
-forallElimRule (Var a) (Forall x p) state
-  | isInAssumptions (Forall x p) state && isInFixed (Var a) state =
-      let p_ = substituteVarProp (Var a) p
+forallElimRule t (Forall x p) state
+  | isInAssumptions (Forall x p) state =
+      let p_ = substituteVarProp t p
        in state
             { assumptions = p_ : assumptions state,
-              tactics = ForallElim (Var a) (Forall x p) : tactics state
+              tactics = ForallElim t (Forall x p) : tactics state
             }
+  | otherwise =
+      error "Forall Elimination is not valid in the current context"
 forallElimRule _ _ _ =
   error "Forall Introduction must be applied to a Forall proposition"
 
 -- existsIntroRule :: Term -> Prop -> ProofState -> ProofState
--- existsElimRule :: Term -> Prop -> Prop -> ProofState -> ProofState
+
+-- existsE a exists x. p(x)
+existsElimRule :: Term -> Prop -> ProofState -> ProofState
+existsElimRule t (Exists x p) state
+  | isInAssumptions (Exists x p) state && isConst t =
+      let p_ = substituteVarProp t p
+       in state
+            { assumptions = p_ : assumptions state,
+              tactics = ExistsElim t (Exists x p) : tactics state
+            }
+  | otherwise =
+      error "Exists Elimination is not valid in the current context"
+existsElimRule _ _ _ =
+  error "Exists Elimination must be applied to an Exists proposition"
 
 -- Helper functions
 
@@ -238,6 +253,10 @@ isInAssumptions prop state =
 isInFixed :: Term -> ProofState -> Bool
 isInFixed term state =
   term `elem` fixed state
+
+isConst :: Term -> Bool
+isConst (Func _ _) = True
+isConst _ = False
 
 substituteVarProp :: Term -> Prop -> Prop
 substituteVarProp term = substituteAtLevel term 0

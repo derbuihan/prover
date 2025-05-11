@@ -30,6 +30,7 @@ The tactics are as follows:
 
 | Tactic  | Example                  | Description                                                                |
 | ------- | ------------------------ | -------------------------------------------------------------------------- |
+| fix     | fix a                    | fixed a (where a is a variable)                                            |
 | forallI | forallI a p(a)           | add forall x. p(x) to assumptions (if p(a) is provedf for any a)           |
 | forallE | forallE a forall x. p(x) | add p(a) to assumptions (where forall x. p(x) is in the assumptions)       |
 | existsI | existsI a p(a)           | add exists x. p(x) to assumptions (where p(a) is in the assumptions)       |

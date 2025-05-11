@@ -169,6 +169,7 @@ parseTerm_ _ = error "Expected term"
 
 parseArgs :: Parser [Term]
 parseArgs [] = ([], [])
+parseArgs (TRParen : tokens) = ([], tokens)
 parseArgs tokens =
   let (term, rest) = parseTerm_ tokens
    in case rest of
